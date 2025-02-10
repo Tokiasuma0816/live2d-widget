@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Chat</title>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@master/dist/autoload.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #chat-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 5px 0;
+            max-width: 80%;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .ai-message {
+            background: #e0e0e0;
+            align-self: flex-start;
+        }
+        #input-container {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* 配置框样式 */
+        #config-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="输入消息...">
+            <button onclick="sendMessage()">发送</button>
+        </div>
+        <button onclick="toggleConfig()">⚙ 设置</button>
+    </div>
+
+    <div id="config-container">
+        <h3>设置</h3>
+        <label>Gemini API Key：</label>
+        <input type="text" id="api-key" placeholder="输入你的 API Key">
+        <label>API 代理地址：</label>
+        <input type="text" id="proxy-url" placeholder="输入代理地址">
+        <label>自定义 Prompt：</label>
+        <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+        <button onclick="saveConfig()">保存</button>
+    </div>
+
+    <script>
+        // 切换设置面板
+        function toggleConfig() {
+            const config = document.getElementById("config-container");
+            config.style.display = config.style.display === "none" ? "flex" : "none";
+            loadConfig();
+        }
+
+        // 保存 API Key 和代理地址
+        function saveConfig() {
+            const apiKey = document.getElementById("api-key").value;
+            const proxyUrl = document.getElementById("proxy-url").value;
+            const customPrompt = document.getElementById("custom-prompt").value;
+            localStorage.setItem("gemini_api_key", apiKey);
+            localStorage.setItem("proxy_url", proxyUrl);
+            localStorage.setItem("custom_prompt", customPrompt);
+            document.getElementById("config-container").style.display = "none";
+        }
+
+        // 加载配置
+        function loadConfig() {
+            document.getElementById("api-key").value = localStorage.getItem("gemini_api_key") || "";
+            document.getElementById("proxy-url").value = localStorage.getItem("proxy_url") || "";
+            document.getElementById("custom-prompt").value = localStorage.getItem("custom_prompt") || "";
+        }
+
+        // 发送用户消息
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            const apiKey = localStorage.getItem("gemini_api_key");
+            const proxyUrl = localStorage.getItem("proxy_url");
+
+            if (!apiKey || !proxyUrl) {
+                alert("请先设置 API Key 和代理地址！");
+                return;
+            }
+
+            const customPrompt = localStorage.getItem("custom_prompt") || "";
+
+            addMessage("user", userInput);
+            showLive2DMessage("让我想想...");
+
+            const apiUrl = `${proxyUrl}/v1/chat/completions`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gemini-pro",
+                        messages: [
+                            { role: "system", content: customPrompt }, // 用户设定的 AI 角色
+                            { role: "user", content: userInput }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const aiResponse = data.choices?.[0]?.message?.content || "AI 没有返回结果";
+
+                addMessage("ai", aiResponse);
+                showLive2DMessage(aiResponse);
+            } catch (error) {
+                console.error("请求失败：", error);
+                showLive2DMessage("请求失败，请检查代理地址或 API Key！");
+            }
+        }
+
+        // 添加聊天消息
+        function addMessage(role, text) {
+            const messages = document.getElementById("messages");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", role === "user" ? "user-message" : "ai-message");
+            messageDiv.textContent = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // 让 Live2D 看板娘显示消息
+        function showLive2DMessage(text) {
+            if (typeof window.showMessage === "function") {
+                window.showMessage(text, 5000);
+            }
+        }
+
+        // 监听 Live2D 点击事件
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("#waifu")?.addEventListener("click", function () {
+                document.getElementById("user-input").focus();
+            });
+        });
+
+        // 页面加载时恢复配置
+        window.onload = loadConfig;
+    </script>
+
+</body>
+</html>
