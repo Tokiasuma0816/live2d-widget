@@ -52,7 +52,7 @@ async function sendMessageToGemini(message) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer AIzaSyAs0tnayhWePKrwBw6vUjPKyCw8f0a2ulw"
+            "Authorization": "Bearer key"
         },
         body: JSON.stringify({
             model: "gpt-4",
