@@ -28,7 +28,7 @@ if (screen.width >= 768) {
         loadExternalResource(live2d_path + "live2d.min.js", "js")
     ]).then(() => {
         // 配置 Live2D 看板娘
-        initWidget({
+        initwwidget({
             cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
             tools: ["asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
