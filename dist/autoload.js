@@ -48,21 +48,35 @@ if (screen.width >= 768) {
 
 // 发送消息到 Gemini API
 async function sendMessageToGemini(message) {
-    const response = await fetch("https://geminiapi.oiviofan.us.kg/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer key"
-        },
-        body: JSON.stringify({
-            model: "gpt-4",
-            messages: [{ role: "user", content: message }]
-        })
-    });
+    const apiKey = localStorage.getItem("gemini_api_key");
+    const proxyUrl = localStorage.getItem("proxy_url");
 
-    const data = await response.json();
-    return data.choices[0].message.content; // 获取 Gemini 返回的文本
+    if (!apiKey || !proxyUrl) {
+        showMessage("请先在设置中填写 API Key 和代理地址！", 5000, 8);
+        return "请先在设置中填写 API Key 和代理地址！";
+    }
+
+    try {
+        const response = await fetch(`${proxyUrl}/v1/chat/completions`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "gemini-pro",
+                messages: [{ role: "user", content: message }]
+            })
+        });
+
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "AI 没有返回结果";
+    } catch (error) {
+        console.error("请求失败：", error);
+        return "请求失败，请检查代理地址或 API Key！";
+    }
 }
+
 
 // 发送消息并让 Live2D 说话
 async function sendAndShowMessage(message) {
