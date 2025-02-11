@@ -4,21 +4,21 @@
         return Array.isArray(e) ? e[Math.floor(Math.random() * e.length)] : e
     }
     let t;
-    function o(o, s, n) {
-        if (!o || sessionStorage.getItem("waifu-text") && sessionStorage.getItem("waifu-text") > n)
-            return;
-        t && (clearTimeout(t),
-        t = null),
-        o = e(o),
-        sessionStorage.setItem("waifu-text", n);
-        const i = document.getElementById("waifu-tips");
-        i.innerHTML = o,
-        i.classList.add("waifu-tips-active"),
-        t = setTimeout(( () => {
-            sessionStorage.removeItem("waifu-text"),
-            i.classList.remove("waifu-tips-active")
+    function showMessage(text, timeout, priority) {
+        if (!text || (sessionStorage.getItem("waifu-text") && sessionStorage.getItem("waifu-text") > priority)) return;
+        if (messageTimer) {
+            clearTimeout(messageTimer);
+            messageTimer = null;
         }
-        ), s)
+        text = randomSelection(text);
+        sessionStorage.setItem("waifu-text", priority);
+        const tips = document.getElementById("waifu-tips");
+        tips.innerHTML = text;
+        tips.classList.add("waifu-tips-active");
+        messageTimer = setTimeout(() => {
+            sessionStorage.removeItem("waifu-text");
+            tips.classList.remove("waifu-tips-active");
+        }, timeout);
     }
     class s {
         constructor(e) {
@@ -43,7 +43,7 @@
         async loadModel(t, s, n) {
             if (localStorage.setItem("modelId", t),
             localStorage.setItem("modelTexturesId", s),
-            o(n, 4e3, 10),
+            showMessage(n, 4e3, 10),
             this.useCDN) {
                 this.modelList || await this.loadModelList();
                 const o = e(this.modelList.models[t]);
@@ -59,10 +59,10 @@
                 this.modelList || await this.loadModelList();
                 const s = e(this.modelList.models[t]);
                 loadlive2d("live2d", `${this.cdnPath}model/${s}/index.json`),
-                o("我的新衣服好看嘛？", 4e3, 10)
+                showMessage("我的新衣服好看嘛？", 4e3, 10)
             } else
                 fetch(`${this.apiPath}rand_textures/?id=${t}-${s}`).then((e => e.json())).then((e => {
-                    1 !== e.textures.id || 1 !== s && 0 !== s ? this.loadModel(t, e.textures.id, "我的新衣服好看嘛？") : o("我还没有其他衣服呢！", 4e3, 10)
+                    1 !== e.textures.id || 1 !== s && 0 !== s ? this.loadModel(t, e.textures.id, "我的新衣服好看嘛？") : showMessage("我还没有其他衣服呢！", 4e3, 10)
                 }
                 ))
         }
@@ -112,7 +112,7 @@
             icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">\x3c!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --\x3e<path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>',
             callback: () => {
                 localStorage.setItem("waifu-display", Date.now()),
-                o("愿你有一天能与重要的人重逢。", 2e3, 11),
+                showMessage("愿你有一天能与重要的人重逢。", 2e3, 11),
                 document.getElementById("waifu").style.bottom = "-500px",
                 setTimeout(( () => {
                     document.getElementById("waifu").style.display = "none",
@@ -132,12 +132,12 @@
                 n ? (n = !1,
                 clearInterval(s),
                 s = null) : s || (s = setInterval(( () => {
-                    o(i, 6e3, 9)
+                    showMessage(i, 6e3, 9)
                 }
                 ), 2e4))
             }
             ), 1e3),
-            o(function(e) {
+            showMessage(function(e) {
                 if ("/" === location.pathname)
                     for (let {hour: t, text: o} of e) {
                         const e = new Date
@@ -166,7 +166,7 @@
                     if (s.target.matches(n))
                         return i = e(i),
                         i = i.replace("{text}", s.target.innerText),
-                        void o(i, 4e3, 8)
+                        void showMessage(i, 4e3, 8)
             }
             )),
             window.addEventListener("click", (s => {
@@ -174,7 +174,7 @@
                     if (s.target.matches(n))
                         return i = e(i),
                         i = i.replace("{text}", s.target.innerText),
-                        void o(i, 4e3, 8)
+                        void showMessage(i, 4e3, 8)
             }
             )),
             t.seasons.forEach(( ({date: t, text: o}) => {
@@ -189,15 +189,15 @@
             ;
             console.log("%c", c),
             c.toString = () => {
-                o(t.message.console, 6e3, 9)
+                showMessage(t.message.console, 6e3, 9)
             }
             ,
             window.addEventListener("copy", ( () => {
-                o(t.message.copy, 6e3, 9)
+                showMessage(t.message.copy, 6e3, 9)
             }
             )),
             window.addEventListener("visibilitychange", ( () => {
-                document.hidden || o(t.message.visibilitychange, 6e3, 9)
+                document.hidden || showMessage(t.message.visibilitychange, 6e3, 9)
             }
             ))
         }
