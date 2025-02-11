@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.2/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.3/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -35,14 +35,22 @@ function addSettingsButton(widget) {
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
     const proxyUrl = localStorage.getItem("proxy_url") || "";
+    
+    // 检查是否已存在对话框
+    let existingDialog = document.querySelector(".settings-dialog");
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+
     const dialog = document.createElement("div");
+    dialog.classList.add("settings-dialog"); 
     dialog.innerHTML = `
         <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
                     background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:10000">
             <h3>Gemini AI 设置</h3>
             <p><label>API Key: </label><input type="text" id="gemini-api-key" value="${apiKey}"></p>
             <p><label>代理地址: </label><input type="text" id="proxy-url" value="${proxyUrl}"></p>
-            <button onclick="this.parentElement.parentElement.remove();saveSettings()">保存</button>
+            <button onclick="saveSettings();this.parentElement.parentElement.remove()">保存</button>
         </div>
     `;
     document.body.appendChild(dialog);
@@ -50,11 +58,16 @@ function showSettingsDialog() {
 
 // 保存设置
 function saveSettings() {
-    const apiKey = document.getElementById("gemini-api-key").value;
-    const proxyUrl = document.getElementById("proxy-url").value;
-    localStorage.setItem("gemini_api_key", apiKey);
-    localStorage.setItem("proxy_url", proxyUrl);
-    showMessage("设置已保存！", 3000, 8);
+    const apiKeyInput = document.getElementById("gemini-api-key");
+    const proxyUrlInput = document.getElementById("proxy-url");
+    
+    if (apiKeyInput && proxyUrlInput) {
+        localStorage.setItem("gemini_api_key", apiKeyInput.value);
+        localStorage.setItem("proxy_url", proxyUrlInput.value);
+        showMessage("设置已保存！", 3000, 8);
+    } else {
+        console.error("无法找到设置输入框");
+    }
 }
 
 // 加载必要资源
@@ -74,7 +87,6 @@ if (screen.width >= 768) {
         // 添加自定义设置按钮
         setTimeout(() => {
             addSettingsButton();
-             //删除这里的事件监听器代码
         }, 1000);
     });
 }
