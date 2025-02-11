@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.0.8/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.0.9/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -144,42 +144,45 @@
             const userInput = document.getElementById("user-input").value.trim();
             if (!userInput) return;
 
-            const { apiKey, proxyUrl, customPrompt } = getConfig();
-
+            const { apiKey, proxyUrl } = getConfig();
             if (!apiKey || !proxyUrl) {
                 alert("请先设置 API Key 和代理地址！");
                 return;
             }
 
             addMessage("user", userInput);
+            document.getElementById("user-input").value = "";
             showLive2DMessage("让我想想...");
 
             try {
-                const response = await fetch(`${proxyUrl}/v1/chat/completions`, {
+                const response = await fetch(proxyUrl, {  // 直接使用proxyUrl，不需要添加路径
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        model: "gemini-pro",
+                        model: "gemini-1.5-flash",  // 使用与Python脚本相同的模型
                         messages: [
-                            { role: "system", content: customPrompt },
                             { role: "user", content: userInput }
-                        ]
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7
                     })
                 });
 
                 if (!response.ok) throw new Error(`HTTP 错误！状态码: ${response.status}`);
 
                 const data = await response.json();
-                const aiResponse = data.choices?.[0]?.message?.content || "AI 没有返回结果";
+                const aiResponse = data.choices?.[0]?.message?.content?.trim() || "AI 没有返回结果";
 
                 addMessage("ai", aiResponse);
                 showLive2DMessage(aiResponse);
             } catch (error) {
                 console.error("请求失败：", error);
-                showLive2DMessage("请求失败，请检查代理地址或 API Key！");
+                const errorMessage = "请求失败，请检查网络或API设置。";
+                addMessage("ai", errorMessage);
+                showLive2DMessage(errorMessage);
             }
         }
 

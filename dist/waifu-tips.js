@@ -1,7 +1,3 @@
-/*!
- * Live2D Widget
- * https://github.com/stevenjoezhang/live2d-widget
- */
 !function() {
     "use strict";
     function e(e) {

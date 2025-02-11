@@ -7,8 +7,6 @@
 ![](https://forthebadge.com/images/badges/powered-by-electricity.svg)
 ![](https://forthebadge.com/images/badges/makes-people-smile.svg)
 
-[English](README.en.md)
-
 ## 特性
 
 在网页中添加 Live2D 看板娘。兼容 PJAX，支持无刷新加载。
@@ -16,12 +14,6 @@
 <img src="demo/screenshots/screenshot-2.png" width="280"><img src="demo/screenshots/screenshot-3.png" width="280"><img src="demo/screenshots/screenshot-1.png" width="270">
 
 （注：以上人物模型仅供展示之用，本仓库并不包含任何模型。）
-
-你也可以查看示例网页：
-
-- 在 [米米的博客](https://zhangshuqiao.org) 的左下角可查看效果
-- [demo/demo.html](https://live2d-widget.pages.dev/demo/demo)，展现基础功能
-- [demo/login.html](https://live2d-widget.pages.dev/demo/login)，仿 NPM 的登陆界面
 
 ## 使用
 
@@ -84,8 +76,6 @@ npm run build
 <script src="https://fastly.jsdelivr.net/gh/username/live2d-widget@latest/autoload.js"></script>
 ```
 将此处的 `username` 替换为你的 GitHub 用户名。为了使 CDN 的内容正常刷新，需要创建新的 git tag 并推送至 GitHub 仓库中，否则此处的 `@latest` 仍然指向更新前的文件。此外 CDN 本身存在缓存，因此改动可能需要一定的时间生效。相关文档：
-- [Git Basics - Tagging](https://git-scm.com/book/en/v2/Git-Basics-Tagging)
-- [Managing releases in a repository](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
 ### Self-host
 
@@ -120,9 +110,6 @@ https://example.com/path/to/live2d-widget/
     <img alt="BrowserStack Logo" height="80" src="https://live.browserstack.com/images/opensource/browserstack-logo.svg">
   </picture>
 </a>
-
-> 感谢 BrowserStack 容许我们在真实的浏览器中测试此项目。  
-> Thanks to [BrowserStack](https://www.browserstack.com/) for providing the infrastructure that allows us to test in real browsers!
 
 <a href="https://www.jsdelivr.com">
   <picture>
@@ -161,11 +148,6 @@ https://github.com/LikeNeko/L2dPetForMac
 
 以及 Wallpaper Engine：  
 https://github.com/guansss/nep-live2d
-
-## 许可证
-
-Released under the GNU General Public License v3  
-http://www.gnu.org/licenses/gpl-3.0.html
 
 本仓库并不包含任何模型，用作展示的所有 Live2D 模型、图片、动作数据等版权均属于其原作者，仅供研究学习，不得用于商业用途。
 

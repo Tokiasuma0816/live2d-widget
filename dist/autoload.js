@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.0.8/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.0.9/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -74,16 +74,7 @@ if (screen.width >= 768) {
         // 添加自定义设置按钮
         setTimeout(() => {
             addSettingsButton();
-            
-            // 添加 Gemini 对话功能
-            document.querySelector("#waifu").addEventListener("dblclick", async () => {
-                const userInput = prompt("你想问我什么呢？");
-                if (userInput) {
-                    showMessage("让我想想...", 2000, 8);
-                    const response = await sendMessageToGemini(userInput);
-                    showMessage(response, 6000, 8);
-                }
-            });
+             //删除这里的事件监听器代码
         }, 1000);
     });
 }
