@@ -1,25 +1,35 @@
 !function() {
     "use strict";
+    
+    // 声明全局变量
+    let messageTimer = null;
+    
     function e(e) {
         return Array.isArray(e) ? e[Math.floor(Math.random() * e.length)] : e
     }
-    let t;
-    function showMessage(text, timeout, priority) {
+    
+    // 将showMessage暴露到全局作用域
+    window.showMessage = function(text, timeout, priority) {
         if (!text || (sessionStorage.getItem("waifu-text") && sessionStorage.getItem("waifu-text") > priority)) return;
+
         if (messageTimer) {
             clearTimeout(messageTimer);
             messageTimer = null;
         }
-        text = randomSelection(text);
+
+        let randomText = e(text);
         sessionStorage.setItem("waifu-text", priority);
+        
         const tips = document.getElementById("waifu-tips");
-        tips.innerHTML = text;
+        tips.innerHTML = randomText;
         tips.classList.add("waifu-tips-active");
+        
         messageTimer = setTimeout(() => {
             sessionStorage.removeItem("waifu-text");
             tips.classList.remove("waifu-tips-active");
         }, timeout);
     }
+
     class s {
         constructor(e) {
             let {apiPath: t, cdnPath: o} = e
