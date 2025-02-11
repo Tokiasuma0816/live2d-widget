@@ -150,12 +150,17 @@
                 return;
             }
 
-            addMessage("user", userInput);
+            // 先清空输入框
             document.getElementById("user-input").value = "";
+            
+            // 先添加用户消息到历史记录
+            addMessage("user", userInput);
+            
+            // 显示思考中的状态
             showLive2DMessage("让我想想...");
 
             try {
-                const response = await fetch(proxyUrl, {  // 直接使用proxyUrl，不需要添加路径
+                const response = await fetch(proxyUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -176,13 +181,21 @@
                 const data = await response.json();
                 const aiResponse = data.choices?.[0]?.message?.content?.trim() || "AI 没有返回结果";
 
-                addMessage("ai", aiResponse);
+                // 优先在对话框显示回答
                 showLive2DMessage(aiResponse);
+                
+                // 延迟一会儿再添加到历史记录
+                setTimeout(() => {
+                    addMessage("ai", aiResponse);
+                }, 800);
+
             } catch (error) {
                 console.error("请求失败：", error);
                 const errorMessage = "请求失败，请检查网络或API设置。";
-                addMessage("ai", errorMessage);
                 showLive2DMessage(errorMessage);
+                setTimeout(() => {
+                    addMessage("ai", errorMessage);
+                }, 800);
             }
         }
 
@@ -197,7 +210,8 @@
 
         function showLive2DMessage(text) {
             if (typeof window.showMessage === "function") {
-                window.showMessage(text, 5000);
+                // 增加显示时间到8秒,让用户有足够时间阅读
+                window.showMessage(text, 8000);
             }
         }
 
