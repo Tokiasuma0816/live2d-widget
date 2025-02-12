@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.0/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.1/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -83,6 +83,9 @@ if (screen.width >= 768) {
         loadExternalResource(live2d_path + "live2d.min.js", "js"),
         loadExternalResource(live2d_path + "waifu-tips.js", "js")
     ]).then(() => {
+        // 获取保存的位置设置,默认左侧
+        const isRight = localStorage.getItem("model_position") === "right";
+        
         // 初始化看板娘配置
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
@@ -90,10 +93,10 @@ if (screen.width >= 768) {
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
-        // 添加自定义设置按钮
+        // 添加设置按钮并设置初始位置
         setTimeout(() => {
             addSettingsButton();
-             //删除这里的事件监听器代码
+            updateModelPosition(isRight);
         }, 1000);
     });
 }
@@ -148,15 +151,6 @@ window.showMessage = function(text, timeout) {
         console.warn("Live2D 消息模块未就绪");
     }
 }
-
-// 加载时初始化位置
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        // 默认左侧
-        const isRight = localStorage.getItem("model_position") === "right"; 
-        updateModelPosition(isRight);
-    }, 1000);
-});
 
 // 暴露给全局使用
 window.saveSettings = saveSettings;

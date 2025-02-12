@@ -301,4 +301,5 @@
             }
         };
     }
+    window.initWidget = initWidget;
 }();
