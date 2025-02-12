@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.3/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.4/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -199,10 +199,15 @@
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
                             try {
-                                const data = JSON.parse(line.slice(5));
-                                const content = data.choices?.[0]?.delta?.content || '';
-                                if (content) {
-                                    accumulatedText += content;
+                                // 处理特殊的[DONE]标记
+                                const content = line.slice(5).trim();
+                                if (content === '[DONE]') continue;
+                                
+                                // 解析JSON响应
+                                const data = JSON.parse(content);
+                                const newText = data.choices?.[0]?.delta?.content || '';
+                                if (newText) {
+                                    accumulatedText += newText;
                                     // 更新AI消息内容
                                     aiMessageDiv.textContent = accumulatedText;
                                     // 更新Live2D显示
@@ -211,7 +216,8 @@
                                     document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
                                 }
                             } catch (e) {
-                                console.error("解析响应出错:", e);
+                                console.debug("解析行出错,可能是[DONE]标记:", line);
+                                continue;
                             }
                         }
                     }

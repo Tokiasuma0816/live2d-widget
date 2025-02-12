@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.3/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.4/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -70,6 +70,20 @@ function saveSettings() {
     }
 }
 
+// 将saveSettings也挂载到window对象
+window.saveSettings = function() {
+    const apiKeyInput = document.getElementById("gemini-api-key");
+    const proxyUrlInput = document.getElementById("proxy-url");
+    
+    if (apiKeyInput && proxyUrlInput) {
+        localStorage.setItem("gemini_api_key", apiKeyInput.value);
+        localStorage.setItem("proxy_url", proxyUrlInput.value);
+        window.showMessage("设置已保存！", 3000);
+    } else {
+        console.error("无法找到设置输入框");
+    }
+}
+
 // 加载必要资源
 if (screen.width >= 768) {
     Promise.all([
@@ -122,3 +136,30 @@ async function sendMessageToGemini(message) {
         return "抱歉，请求失败了，请检查网络或API设置。";
     }
 }
+
+// 将showMessage挂载到window对象
+window.showMessage = function(text, timeout) {
+    if (window.initWidget) {
+        window.initWidget.showMessage(text, timeout);  
+    }
+}
+
+console.log(`
+    く__,.ヘヽ.        /  ,ー､ 〉
+             ＼ ', !-─‐-i  /  /´
+             ／｀ｰ'       L/／｀ヽ､
+           /   ／,   /|   ,   ,       ',
+         ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+          ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+            !,/7 '0'     ´0iソ|    |
+            |.从"    _     ,,,, / |./    |
+            ﾚ'| i＞.､,,__  _,.イ /   .i   |
+              ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+                | |/i 〈|/   i  ,.ﾍ |  i  |
+               .|/ /  ｉ：    ﾍ!    ＼  |
+                kヽ>､ﾊ    _,.ﾍ､    /､!
+                !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+                ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                    ﾄ-,/  |___./
+                    'ｰ'    !_,.:
+  `);
