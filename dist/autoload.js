@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.7/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.8/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -91,37 +91,33 @@ function saveSettings() {
     }
 }
 
-// 更新Live2D位置 - 修复语法错误
+// 更新Live2D位置
 function updateModelPosition(isRight) {
     const waifuElement = document.getElementById("waifu");
     const toolElement = document.getElementById("waifu-tool");
     if (waifuElement && toolElement) {
         // 更新模型位置
-        waifuElement.style.right = isRight ? "0" : "";
-        waifuElement.style.left = isRight ? "" : "0";
+        waifuElement.style.right = isRight ? "0" : "auto";
+        waifuElement.style.left = isRight ? "auto" : "0";
         
         // 更新工具栏位置
-        if (isRight) {
-            toolElement.style.right = "auto"; 
-            toolElement.style.left = "10px";
-        } else {
-            toolElement.style.right = "10px";
-            toolElement.style.left = "auto";  
-        }
+        toolElement.style.right = isRight ? "auto" : "-50px"; 
+        toolElement.style.left = isRight ? "-50px" : "auto";
     }
 }
 
-// 将 saveSettings 挂载到 window 对象
+// 将函数挂载到window对象
 window.saveSettings = saveSettings;
 
-// 在window上挂载showMessage函数供外部调用
+// 在window上挂载showMessage函数供外部调用  
 window.showMessage = function(text, timeout) {
-    if(window.initWidget && window.initWidget.modules) {
-        window.initWidget.modules.message.show(text, timeout); 
+    if(window.initWidget && window.initWidget.modules && 
+       typeof window.initWidget.modules.message.show === 'function') {
+        window.initWidget.modules.message.show(text, timeout);
     }
 }
 
-// 初始化时设置位置 
+// 初始化设置位置
 window.addEventListener('DOMContentLoaded', () => {
     const isRight = localStorage.getItem("model_position") === "right";
     updateModelPosition(isRight);
@@ -134,14 +130,12 @@ if (screen.width >= 768) {
         loadExternalResource(live2d_path + "live2d.min.js", "js"), 
         loadExternalResource(live2d_path + "waifu-tips.js", "js")
     ]).then(() => {
-        // 初始化看板娘配置
-        initWidget({
+        window.initWidget = initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
             tools: ["hitokoto", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
-        // 添加自定义设置按钮
         setTimeout(() => {
             addSettingsButton();
         }, 1000);
@@ -152,7 +146,6 @@ if (screen.width >= 768) {
 async function sendMessageToGemini(message) {
     const apiKey = localStorage.getItem("gemini_api_key");
     const proxyUrl = localStorage.getItem("proxy_url");
-    
     if (!apiKey || !proxyUrl) {
         return "请先设置 API Key 和代理地址！";
     }
@@ -167,7 +160,6 @@ async function sendMessageToGemini(message) {
             body: JSON.stringify({
                 model: "gemini-1.5-flash",
                 messages: [{ role: "user", content: message }],
-                stream: true,
                 max_tokens: 1000,
                 temperature: 0.7
             })
@@ -181,23 +173,3 @@ async function sendMessageToGemini(message) {
         return "抱歉，请求失败了，请检查网络或API设置。";
     }
 }
-
-console.log(`
-    く__,.ヘヽ.        /  ,ー､ 〉
-             ＼ ', !-─‐-i  /  /´
-             ／｀ｰ'       L/／｀ヽ､
-           /   ／,   /|   ,   ,       ',
-         ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
-          ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
-            !,/7 '0'     ´0iソ|    |  ',
-            |.从"    _     ,,,, / |./    |
-            ﾚ'| i＞.､,,__  _,.イ /   .i   |
-              ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
-                | |/i 〈|/   i  ,.ﾍ |  i  |
-               .|/ /  ｉ：    ﾍ!    ＼  |  |
-                kヽ>､ﾊ    _,.ﾍ､    /､!|
-                !'〈//｀Ｔ´', ＼ ｀'7'ｰr'  i  |
-                ﾚ'ヽL__|___i,___,ンﾚ|ノ |
-                    ﾄ-,/  |___./  /､!
-                    'ｰ'    !_,.:'ｰr'
-  `);
