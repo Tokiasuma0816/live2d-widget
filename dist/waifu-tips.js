@@ -278,4 +278,27 @@
         }
         ), 0)) : i(e)
     }
+
+    function initWidget(config) {
+        window.initWidget = {
+            messageTimer: null,
+            modules: {
+                message: {
+                    show: function(text, timeout) {
+                        const tip = document.getElementById("waifu-tips");
+                        if (tip) {
+                            if (window.initWidget.messageTimer) {
+                                clearTimeout(window.initWidget.messageTimer); 
+                            }
+                            tip.innerHTML = text;
+                            tip.classList.add("waifu-tips-active");
+                            window.initWidget.messageTimer = setTimeout(() => {
+                                tip.classList.remove("waifu-tips-active");
+                            }, timeout || 3000);
+                        }
+                    }
+                }
+            }
+        };
+    }
 }();
