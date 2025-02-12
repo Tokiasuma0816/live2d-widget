@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.3/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.4/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -98,6 +98,12 @@ function updateModelPosition(isRight) {
         waifuElement.style.right = isRight ? "0" : "";
         waifuElement.style.left = isRight ? "" : "0";
     }
+
+    const waifuTool = document.getElementById("waifu-tool");
+    if (waifuTool) {
+        waifuTool.style.right = isRight ? "0" : "";
+        waifuTool.style.left = isRight ? "" : "0";
+    }
 }
 
 // 将 saveSettings 挂载到 window 对象
@@ -126,6 +132,13 @@ if (screen.width >= 768) {
         // 添加自定义设置按钮
         setTimeout(() => {
             addSettingsButton();
+        }, 1000);
+
+        // 显式初始化 waifu-tips
+        setTimeout(() => {
+            if (typeof initTips === "function") {
+                initTips();
+            }
         }, 1000);
     });
 }
