@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.5/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.6/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -103,12 +103,18 @@
 
     <div id="config-container">
         <h3>设置</h3>
-        <label>Gemini API Key：</label>
-        <input type="text" id="api-key" placeholder="输入你的 API Key">
-        <label>API 代理地址：</label>
-        <input type="text" id="proxy-url" placeholder="输入代理地址">
-        <label>自定义 Prompt：</label>
-        <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+        <div>
+            <label for="api-key">Gemini API Key：</label>
+            <input type="text" id="api-key" placeholder="输入你的 API Key">
+        </div>
+        <div>
+            <label for="proxy-url">API 代理地址：</label>
+            <input type="text" id="proxy-url" placeholder="输入代理地址">
+        </div>
+        <div>
+            <label for="custom-prompt">自定义 Prompt：</label>
+            <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+        </div>
         <button onclick="saveConfig()">保存</button>
     </div>
 
