@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.6/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.7/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -94,14 +94,32 @@ function saveSettings() {
 // 更新Live2D位置 - 修复语法错误
 function updateModelPosition(isRight) {
     const waifuElement = document.getElementById("waifu");
-    if (waifuElement) {
+    const toolElement = document.getElementById("waifu-tool");
+    if (waifuElement && toolElement) {
+        // 更新模型位置
         waifuElement.style.right = isRight ? "0" : "";
         waifuElement.style.left = isRight ? "" : "0";
+        
+        // 更新工具栏位置
+        if (isRight) {
+            toolElement.style.right = "auto"; 
+            toolElement.style.left = "10px";
+        } else {
+            toolElement.style.right = "10px";
+            toolElement.style.left = "auto";  
+        }
     }
 }
 
 // 将 saveSettings 挂载到 window 对象
 window.saveSettings = saveSettings;
+
+// 在window上挂载showMessage函数供外部调用
+window.showMessage = function(text, timeout) {
+    if(window.initWidget && window.initWidget.modules) {
+        window.initWidget.modules.message.show(text, timeout); 
+    }
+}
 
 // 初始化时设置位置 
 window.addEventListener('DOMContentLoaded', () => {

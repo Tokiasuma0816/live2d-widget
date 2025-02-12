@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.6/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.7/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,8 +255,8 @@
         }
 
         function showLive2DMessage(text) {
-            if (typeof window.showMessage === "function") {
-                // 增加显示时间到8秒,让用户有足够时间阅读
+            // 使用window.showMessage而不是直接调用
+            if (window.showMessage) {
                 window.showMessage(text, 8000);
             }
         }
