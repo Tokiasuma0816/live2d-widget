@@ -30,10 +30,23 @@
         }, timeout);
     }
 
+    // 修改 window.showMessage 实现,确保可以正确显示消息
     window.showMessage = function(text, timeout) {
-        if (window.initWidget && window.initWidget.modules) {
-            window.initWidget.modules.message.show(text, timeout);
-        }
+        if (!text) return;
+
+        const tips = document.getElementById("waifu-tips");
+        if (!tips) return;
+
+        // 检查模型位置来设置气泡位置
+        const isRight = localStorage.getItem("model_position") === "right";
+        tips.style.right = isRight ? "" : "-25px"; 
+        tips.style.left = isRight ? "-25px" : "";
+        
+        tips.innerHTML = text;
+        tips.classList.add("waifu-tips-active");
+        messageTimer = setTimeout(() => {
+            tips.classList.remove("waifu-tips-active");
+        }, timeout);
     }
 
     // 增加保存设置回调
