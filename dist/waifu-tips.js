@@ -30,6 +30,22 @@
         }, timeout);
     }
 
+    window.showMessage = function(text, timeout) {
+        if (window.initWidget && window.initWidget.modules) {
+            window.initWidget.modules.message.show(text, timeout);
+        }
+    }
+
+    // 增加保存设置回调
+    window.updateModelPosition = function(isRight) {
+        const waifu = document.getElementById("waifu");
+        if (waifu) {
+            waifu.style.right = isRight ? "0" : ""; 
+            waifu.style.left = isRight ? "" : "0";
+            waifu.style.transition = "right .3s, left .3s"; 
+        }
+    }
+
     class s {
         constructor(e) {
             let {apiPath: t, cdnPath: o} = e

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.4/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.5/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -144,39 +144,47 @@
             const userInput = document.getElementById("user-input").value.trim();
             if (!userInput) return;
 
-            const { apiKey, proxyUrl } = getConfig();
+            const { apiKey, proxyUrl, customPrompt } = getConfig();
             if (!apiKey || !proxyUrl) {
                 alert("请先设置 API Key 和代理地址！");
                 return;
             }
 
-            // 清空输入框
             document.getElementById("user-input").value = "";
-            
-            // 添加用户消息
             addMessage("user", userInput);
             
-            // 创建AI消息占位
             const aiMessageDiv = document.createElement("div");
             aiMessageDiv.classList.add("message", "ai-message");
             aiMessageDiv.textContent = ""; 
             document.getElementById("messages").appendChild(aiMessageDiv);
             
-            // 显示思考状态
             showLive2DMessage("让我想想...");
             
             try {
+                // 构建messages数组,加入prompt
+                let messages = [];
+                if(customPrompt) {
+                    messages.push({
+                        role: "system",
+                        content: customPrompt
+                    });
+                }
+                messages.push({
+                    role: "user", 
+                    content: userInput
+                });
+
                 const response = await fetch(proxyUrl, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json", 
+                        "Content-Type": "application/json",
                         "Authorization": `Bearer ${apiKey}`,
-                        "Accept": "text/event-stream"  // 请求SSE流式响应
+                        "Accept": "text/event-stream"
                     },
                     body: JSON.stringify({
                         model: "gemini-1.5-flash",
-                        messages: [{ role: "user", content: userInput }],
-                        stream: true,  // 启用流式响应
+                        messages: messages,  // 使用包含prompt的messages
+                        stream: true,
                         max_tokens: 1000,
                         temperature: 0.7
                     })

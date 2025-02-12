@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.4/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.5/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -31,58 +31,73 @@ function addSettingsButton(widget) {
     tools.appendChild(settingsButton);
 }
 
-// 显示设置对话框
+// 显示设置对话框 
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
     const proxyUrl = localStorage.getItem("proxy_url") || "";
+    const isRight = localStorage.getItem("model_position") === "right"; // 添加位置配置
     
     // 检查是否已存在对话框
     let existingDialog = document.querySelector(".settings-dialog");
     if (existingDialog) {
         existingDialog.remove();
+        return; // 如果已存在对话框则移除并返回
     }
 
     const dialog = document.createElement("div");
-    dialog.classList.add("settings-dialog"); 
+    dialog.classList.add("settings-dialog");
     dialog.innerHTML = `
         <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
                     background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:10000">
             <h3>Gemini AI 设置</h3>
             <p><label>API Key: </label><input type="text" id="gemini-api-key" value="${apiKey}"></p>
             <p><label>代理地址: </label><input type="text" id="proxy-url" value="${proxyUrl}"></p>
+            <p><label>人物位置: </label>
+                <select id="model-position">
+                    <option value="left" ${!isRight ? 'selected' : ''}>左侧</option>
+                    <option value="right" ${isRight ? 'selected' : ''}>右侧</option>
+                </select>
+            </p>
             <button onclick="saveSettings();this.parentElement.parentElement.remove()">保存</button>
         </div>
     `;
     document.body.appendChild(dialog);
 }
 
-// 保存设置
+// 保存设置 - 合并为一个函数
 function saveSettings() {
     const apiKeyInput = document.getElementById("gemini-api-key");
     const proxyUrlInput = document.getElementById("proxy-url");
+    const positionSelect = document.getElementById("model-position");
     
-    if (apiKeyInput && proxyUrlInput) {
+    if (apiKeyInput && proxyUrlInput && positionSelect) {
         localStorage.setItem("gemini_api_key", apiKeyInput.value);
         localStorage.setItem("proxy_url", proxyUrlInput.value);
-        showMessage("设置已保存！", 3000, 8);
+        localStorage.setItem("model_position", positionSelect.value);
+        
+        // 更新Live2D位置
+        updateModelPosition(positionSelect.value === "right");
+        
+        window.showMessage("设置已保存！", 3000);
     } else {
-        console.error("无法找到设置输入框");
+        console.error("无法找到设置输入框"); 
     }
 }
 
-// 将saveSettings也挂载到window对象
-window.saveSettings = function() {
-    const apiKeyInput = document.getElementById("gemini-api-key");
-    const proxyUrlInput = document.getElementById("proxy-url");
-    
-    if (apiKeyInput && proxyUrlInput) {
-        localStorage.setItem("gemini_api_key", apiKeyInput.value);
-        localStorage.setItem("proxy_url", proxyUrlInput.value);
-        window.showMessage("设置已保存！", 3000);
-    } else {
-        console.error("无法找到设置输入框");
+// 更新Live2D位置
+function updateModelPosition(isRight) {
+    const waifuElement = document.getElementById("waifu");
+    if (waifuElement) {
+        waifuElement.style.right = isRight ? "0" : "";
+        waifuElement.style.left = isRight ? "" : "0";
     }
 }
+
+// 初始化时设置位置
+window.addEventListener('DOMContentLoaded', () => {
+    const isRight = localStorage.getItem("model_position") === "right";
+    updateModelPosition(isRight);
+});
 
 // 加载必要资源
 if (screen.width >= 768) {
@@ -95,12 +110,13 @@ if (screen.width >= 768) {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
-            tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
+            tools: ["hitokoto", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
         // 添加自定义设置按钮
         setTimeout(() => {
             addSettingsButton();
+             //删除这里的事件监听器代码
         }, 1000);
     });
 }
@@ -134,13 +150,6 @@ async function sendMessageToGemini(message) {
     } catch (error) {
         console.error("API请求失败:", error);
         return "抱歉，请求失败了，请检查网络或API设置。";
-    }
-}
-
-// 将showMessage挂载到window对象
-window.showMessage = function(text, timeout) {
-    if (window.initWidget) {
-        window.initWidget.showMessage(text, timeout);  
     }
 }
 
