@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.1/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.2/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -83,8 +83,7 @@ if (screen.width >= 768) {
         loadExternalResource(live2d_path + "live2d.min.js", "js"),
         loadExternalResource(live2d_path + "waifu-tips.js", "js")
     ]).then(() => {
-        // 获取保存的位置设置,默认左侧
-        const isRight = localStorage.getItem("model_position") === "right";
+        let modelFirstInit = true; // 标记是否首次初始化
         
         // 初始化看板娘配置
         initWidget({
@@ -93,11 +92,31 @@ if (screen.width >= 768) {
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
-        // 添加设置按钮并设置初始位置
-        setTimeout(() => {
-            addSettingsButton();
-            updateModelPosition(isRight);
-        }, 1000);
+        // 监听看板娘元素加载完成 
+        const modelObserver = new MutationObserver((mutations, observer) => {
+            const waifu = document.getElementById("waifu");
+            const toolbar = document.getElementById("waifu-tool");
+            
+            if(waifu && toolbar) {
+                // 只在首次加载时设置位置和添加按钮
+                if(modelFirstInit) {
+                    // 设置初始位置
+                    const isRight = localStorage.getItem("model_position") === "right";
+                    updateModelPosition(isRight);
+                    
+                    // 添加设置按钮
+                    addSettingsButton(); 
+                    
+                    modelFirstInit = false;
+                }
+            }
+        });
+
+        // 开始监听 body 元素变化
+        modelObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     });
 }
 
