@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.1.9/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.0/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -35,14 +35,22 @@ function addSettingsButton(widget) {
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
     const proxyUrl = localStorage.getItem("proxy_url") || "";
+    const isRight = localStorage.getItem("model_position") === "right"; // 获取位置设置
+    
     const dialog = document.createElement("div");
     dialog.innerHTML = `
         <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
                     background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:10000">
-            <h3>Gemini AI 设置</h3>
+            <h3>设置</h3>
             <p><label>API Key: </label><input type="text" id="gemini-api-key" value="${apiKey}"></p>
             <p><label>代理地址: </label><input type="text" id="proxy-url" value="${proxyUrl}"></p>
-            <button onclick="this.parentElement.parentElement.remove();saveSettings()">保存</button>
+            <p><label>人物位置: </label>
+               <select id="model-position">
+                   <option value="left" ${!isRight ? 'selected' : ''}>左侧</option>
+                   <option value="right" ${isRight ? 'selected' : ''}>右侧</option>
+               </select>
+            </p>
+            <button onclick="saveSettings();this.parentElement.parentElement.remove()">保存</button>
         </div>
     `;
     document.body.appendChild(dialog);
@@ -50,11 +58,22 @@ function showSettingsDialog() {
 
 // 保存设置
 function saveSettings() {
-    const apiKey = document.getElementById("gemini-api-key").value;
-    const proxyUrl = document.getElementById("proxy-url").value;
-    localStorage.setItem("gemini_api_key", apiKey);
-    localStorage.setItem("proxy_url", proxyUrl);
-    showMessage("设置已保存！", 3000, 8);
+    // 从设置对话框获取值
+    const geminiKey = document.querySelector("#gemini-api-key");
+    const proxyUrl = document.querySelector("#proxy-url");
+    const position = document.querySelector("#model-position");
+    
+    // 检查元素是否存在再获取值
+    if(geminiKey && proxyUrl && position) {
+        localStorage.setItem("gemini_api_key", geminiKey.value);
+        localStorage.setItem("proxy_url", proxyUrl.value);
+        localStorage.setItem("model_position", position.value);
+        
+        updateModelPosition(position.value === "right");
+        showMessage("设置已保存！", 3000);
+    } else {
+        console.warn("未找到设置输入框");
+    }
 }
 
 // 加载必要资源
@@ -129,3 +148,15 @@ window.showMessage = function(text, timeout) {
         console.warn("Live2D 消息模块未就绪");
     }
 }
+
+// 加载时初始化位置
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // 默认左侧
+        const isRight = localStorage.getItem("model_position") === "right"; 
+        updateModelPosition(isRight);
+    }, 1000);
+});
+
+// 暴露给全局使用
+window.saveSettings = saveSettings;
