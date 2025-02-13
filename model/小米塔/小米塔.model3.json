@@ -1,0 +1,25 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "小米塔.moc3",
+		"Textures": [
+			"小米塔.4096/texture_00.png",
+			"小米塔.4096/texture_01.png",
+			"小米塔.4096/texture_02.png"
+		],
+		"Physics": "小米塔.physics3.json",
+		"DisplayInfo": "小米塔.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	]
+}
