@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.3/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.4/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -67,9 +67,8 @@ if (screen.width >= 768) {
         // 初始化看板娘配置
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
-            //apiPath: "https://live2d.fghrsh.net/api/",
-            cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.3/",
-            modelName: "小米塔",
+            apiPath: "https://live2d.fghrsh.net/api/",
+            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.4/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
