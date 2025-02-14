@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.4/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.2.7/dist/autoload.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -130,6 +130,13 @@
             localStorage.setItem("proxy_url", document.getElementById("proxy-url").value);
             localStorage.setItem("custom_prompt", document.getElementById("custom-prompt").value);
             document.getElementById("config-container").style.display = "none";
+            
+            // 保存后确保位置正确
+            const waifu = document.querySelector("#waifu");
+            if (waifu) {
+                waifu.style.right = "30px";
+                waifu.style.left = "auto";
+            }
         }
 
         function loadConfig() {
@@ -268,9 +275,20 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelector("#waifu")?.addEventListener("click", () => {
+            // 设置初始位置
+            const waifu = document.querySelector("#waifu");
+            if (waifu) {
+                waifu.style.bottom = "0";
+                waifu.style.right = "30px";  // 设置右侧间距
+            }
+            
+            // 其他事件监听
+            waifu?.addEventListener("click", () => {
                 document.getElementById("user-input").focus();
             });
+            
+            // 加载配置
+            loadConfig();
         });
 
         window.onload = loadConfig;
