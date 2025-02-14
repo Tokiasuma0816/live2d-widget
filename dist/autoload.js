@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.8/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.9/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -66,6 +66,20 @@ function showSettingsDialog() {
         </div>
     `;
     document.body.appendChild(dialog);
+}
+
+// 显示 Live2D 消息
+function showLive2dMessage(text, timeout = 4000) {
+    const tips = document.getElementById("waifu-tips");
+    if (!tips) return;
+    
+    tips.innerHTML = text;
+    tips.classList.add("waifu-tips-active");
+    
+    clearTimeout(window._tipsTimer);
+    window._tipsTimer = setTimeout(() => {
+        tips.classList.remove("waifu-tips-active");
+    }, timeout);
 }
 
 // 保存设置
@@ -159,6 +173,9 @@ function initializePosition() {
         attributes: true,
         attributeFilter: ['style']
     });
+
+    // 添加全局消息显示函数
+    window.showMessage = showLive2dMessage;
 }
 
 // 加载必要资源
@@ -172,7 +189,7 @@ if (screen.width >= 768) {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
-            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.8/",
+            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.9/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
         });
 
@@ -209,9 +226,36 @@ async function sendMessageToGemini(message) {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data = await response.json();
-        return data.choices?.[0]?.message?.content || "抱歉，我现在无法回答这个问题。";
+        const reply = data.choices?.[0]?.message?.content || "抱歉，我现在无法回答这个问题。";
+        
+        // 显示回复到 Live2D 对话框
+        showLive2dMessage(reply, 8000);
+        return reply;
+        
     } catch (error) {
-        console.error("API请求失败:", error);
-        return "抱歉，请求失败了，请检查网络或API设置。";
+        const errorMessage = "抱歉，请求失败了，请检查网络或API设置。";
+        showLive2dMessage(errorMessage, 4000);
+        return errorMessage;
     }
 }
+
+
+console.log(`
+    く__,.ヘヽ.        /  ,ー､ 〉
+             ＼ ', !-─‐-i  /  /´
+             ／｀ｰ'       L/／｀ヽ､
+           /   ／,   /|   ,   ,       ',
+         ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+          ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+            !,/7 '0'     ´0iソ|    |
+            |.从"    _     ,,,, / |./    |
+            ﾚ'| i＞.､,,__  _,.イ /   .i   |
+              ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+                | |/i 〈|/   i  ,.ﾍ |  i  |
+               .|/ /  ｉ：    ﾍ!    ＼  |
+                kヽ>､ﾊ    _,.ﾍ､    /､!
+                !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+                ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                    ﾄ-,/  |___./
+                    'ｰ'    !_,.:
+  `);
