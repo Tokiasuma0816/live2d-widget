@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.7/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.8/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -38,6 +38,7 @@ function showSettingsDialog() {
     const position = localStorage.getItem("waifu-position") || "right";
     
     const dialog = document.createElement("div");
+    dialog.id = "settings-dialog";
     dialog.innerHTML = `
         <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
                     background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:10000">
@@ -60,7 +61,8 @@ function showSettingsDialog() {
                     </label>
                 </p>
             </div>
-            <button onclick="this.parentElement.parentElement.remove();saveSettings()">保存</button>
+            <button onclick="saveSettings()">保存</button>
+            <button onclick="this.parentElement.parentElement.remove()" style="margin-left:10px">取消</button>
         </div>
     `;
     document.body.appendChild(dialog);
@@ -68,28 +70,38 @@ function showSettingsDialog() {
 
 // 保存设置
 function saveSettings() {
-    const apiKey = document.getElementById("gemini-api-key").value;
-    const proxyUrl = document.getElementById("proxy-url").value;
-    const position = document.querySelector('input[name="position"]:checked').value;
-    
-    localStorage.setItem("gemini_api_key", apiKey);
-    localStorage.setItem("proxy_url", proxyUrl);
-    localStorage.setItem("waifu-position", position);
-    
-    // 更新位置
-    const waifu = document.querySelector("#waifu");
-    if (position === "left") {
-        waifu.style.right = "auto";
-        waifu.style.left = "0";
-    } else {
-        waifu.style.right = "30px";
-        waifu.style.left = "auto";
+    try {
+        const apiKey = document.getElementById("gemini-api-key").value;
+        const proxyUrl = document.getElementById("proxy-url").value;
+        const position = document.querySelector('input[name="position"]:checked').value;
+        
+        // 保存设置到 localStorage
+        localStorage.setItem("gemini_api_key", apiKey);
+        localStorage.setItem("proxy_url", proxyUrl);
+        localStorage.setItem("waifu-position", position);
+        
+        // 强制更新位置和工具栏
+        updateToolPosition();
+        
+        // 确保设置已保存后再关闭对话框
+        const dialog = document.querySelector("#settings-dialog");
+        if (dialog) {
+            dialog.remove();
+        }
+        
+        // 显示保存成功消息
+        showMessage("设置已保存！", 3000, 8);
+        
+        // 验证设置是否成功保存
+        const savedPosition = localStorage.getItem("waifu-position");
+        if (savedPosition !== position) {
+            console.error("Position setting not saved correctly");
+            showMessage("设置保存失败，请重试", 3000, 8);
+        }
+    } catch (error) {
+        console.error("Save settings failed:", error);
+        showMessage("设置保存失败，请重试", 3000, 8);
     }
-    
-    // 更新工具栏位置
-    updateToolPosition();
-    
-    showMessage("设置已保存！", 3000, 8);
 }
 
 // 更新工具栏位置
@@ -98,19 +110,55 @@ function updateToolPosition() {
     const tips = document.querySelector("#waifu-tips");
     const tool = document.querySelector("#waifu-tool");
     
-    if (getComputedStyle(waifu).right !== "0px") {
+    // 获取当前位置
+    const position = localStorage.getItem("waifu-position") || "right";
+    
+    if (position === "left") {
         // 左侧布局
+        waifu.style.right = "auto";
+        waifu.style.left = "0";
         tool.style.right = "auto";
         tool.style.left = "10px";
         tips.style.right = "auto";
         tips.style.left = "20px";
     } else {
         // 右侧布局
+        waifu.style.right = "30px";
+        waifu.style.left = "auto";
         tool.style.right = "10px";
         tool.style.left = "auto";
         tips.style.right = "10px";
         tips.style.left = "auto";
     }
+}
+
+// 初始化位置和工具栏
+function initializePosition() {
+    const position = localStorage.getItem("waifu-position") || "right";
+    const waifu = document.querySelector("#waifu");
+    if (!waifu) return;
+
+    // 设置初始位置
+    if (position === "left") {
+        waifu.style.right = "auto";
+        waifu.style.left = "0";
+    } else {
+        waifu.style.right = "30px";
+        waifu.style.left = "auto";
+    }
+
+    // 更新工具栏位置
+    updateToolPosition();
+
+    // 添加位置变化监听
+    const observer = new MutationObserver(() => {
+        updateToolPosition();
+    });
+    
+    observer.observe(waifu, {
+        attributes: true,
+        attributeFilter: ['style']
+    });
 }
 
 // 加载必要资源
@@ -124,24 +172,14 @@ if (screen.width >= 768) {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
-            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.7/",
+            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.8/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
         });
 
-        // 添加自定义设置按钮和位置切换按钮
+        // 添加延迟初始化
         setTimeout(() => {
             addSettingsButton();
-            // 移除独立的位置切换按钮
-            // addPositionToggle();
-            
-            // 恢复保存的位置
-            const savedPosition = localStorage.getItem("waifu-position");
-            const waifu = document.querySelector("#waifu");
-            if (savedPosition === "left") {
-                waifu.style.right = "auto";
-                waifu.style.left = "0";
-                updateToolPosition();
-            }
+            initializePosition();
         }, 1000);
     });
 }
