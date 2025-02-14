@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.5/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.6/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -31,6 +31,16 @@ function addSettingsButton(widget) {
     tools.appendChild(settingsButton);
 }
 
+// 添加位置切换按钮到工具栏
+function addPositionToggle(widget) {
+    const tools = document.getElementById("waifu-tool");
+    const positionButton = document.createElement("span");
+    positionButton.id = "waifu-tool-position";
+    positionButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M32 96l320 0V32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l96 96c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-96 96c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160L32 160c-17.7 0-32-14.3-32-32s14.3-32 32-32zm448 320l-320 0v-64c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-96 96c-6 6-9.4 14.1-9.4 22.6s3.4 16.6 9.4 22.6l96 96c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V480l320 0c17.7 0 32-14.3 32-32s-14.3-32-32-32z"/></svg>';
+    positionButton.addEventListener("click", togglePosition);
+    tools.appendChild(positionButton);
+}
+
 // 显示设置对话框
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
@@ -57,6 +67,48 @@ function saveSettings() {
     showMessage("设置已保存！", 3000, 8);
 }
 
+// 切换位置
+function togglePosition() {
+    const waifu = document.querySelector("#waifu");
+    const currentPosition = getComputedStyle(waifu).right;
+    
+    if (currentPosition !== "0px") {
+        // 切换到左侧
+        waifu.style.right = "auto";
+        waifu.style.left = "0";
+        localStorage.setItem("waifu-position", "left");
+    } else {
+        // 切换到右侧
+        waifu.style.right = "30px";
+        waifu.style.left = "auto";
+        localStorage.setItem("waifu-position", "right");
+    }
+    
+    // 更新工具栏位置
+    updateToolPosition();
+}
+
+// 更新工具栏位置
+function updateToolPosition() {
+    const waifu = document.querySelector("#waifu");
+    const tips = document.querySelector("#waifu-tips");
+    const tool = document.querySelector("#waifu-tool");
+    
+    if (getComputedStyle(waifu).right !== "0px") {
+        // 左侧布局
+        tool.style.right = "auto";
+        tool.style.left = "10px";
+        tips.style.right = "auto";
+        tips.style.left = "20px";
+    } else {
+        // 右侧布局
+        tool.style.right = "10px";
+        tool.style.left = "auto";
+        tips.style.right = "10px";
+        tips.style.left = "auto";
+    }
+}
+
 // 加载必要资源
 if (screen.width >= 768) {
     Promise.all([
@@ -68,14 +120,23 @@ if (screen.width >= 768) {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
-            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.5/",
+            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.6/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
 
-        // 添加自定义设置按钮
+        // 添加自定义设置按钮和位置切换按钮
         setTimeout(() => {
             addSettingsButton();
-             //删除这里的事件监听器代码
+            addPositionToggle();
+            
+            // 恢复保存的位置
+            const savedPosition = localStorage.getItem("waifu-position");
+            const waifu = document.querySelector("#waifu");
+            if (savedPosition === "left") {
+                waifu.style.right = "auto";
+                waifu.style.left = "0";
+                updateToolPosition();
+            }
         }, 1000);
     });
 }
