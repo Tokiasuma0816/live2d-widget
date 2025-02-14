@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.6/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.7/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -31,27 +31,35 @@ function addSettingsButton(widget) {
     tools.appendChild(settingsButton);
 }
 
-// 添加位置切换按钮到工具栏
-function addPositionToggle(widget) {
-    const tools = document.getElementById("waifu-tool");
-    const positionButton = document.createElement("span");
-    positionButton.id = "waifu-tool-position";
-    positionButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M32 96l320 0V32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l96 96c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-96 96c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160L32 160c-17.7 0-32-14.3-32-32s14.3-32 32-32zm448 320l-320 0v-64c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-96 96c-6 6-9.4 14.1-9.4 22.6s3.4 16.6 9.4 22.6l96 96c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V480l320 0c17.7 0 32-14.3 32-32s-14.3-32-32-32z"/></svg>';
-    positionButton.addEventListener("click", togglePosition);
-    tools.appendChild(positionButton);
-}
-
 // 显示设置对话框
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
     const proxyUrl = localStorage.getItem("proxy_url") || "";
+    const position = localStorage.getItem("waifu-position") || "right";
+    
     const dialog = document.createElement("div");
     dialog.innerHTML = `
         <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
                     background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.3);z-index:10000">
-            <h3>Gemini AI 设置</h3>
-            <p><label>API Key: </label><input type="text" id="gemini-api-key" value="${apiKey}"></p>
-            <p><label>代理地址: </label><input type="text" id="proxy-url" value="${proxyUrl}"></p>
+            <h3>设置</h3>
+            <div style="margin-bottom:15px;">
+                <h4 style="margin:10px 0;">Gemini AI 配置</h4>
+                <p><label>API Key: </label><input type="text" id="gemini-api-key" value="${apiKey}"></p>
+                <p><label>代理地址: </label><input type="text" id="proxy-url" value="${proxyUrl}"></p>
+            </div>
+            <div style="margin-bottom:15px;">
+                <h4 style="margin:10px 0;">看板娘位置</h4>
+                <p>
+                    <label>
+                        <input type="radio" name="position" value="left" ${position === "left" ? "checked" : ""}>
+                        左侧
+                    </label>
+                    <label style="margin-left:15px;">
+                        <input type="radio" name="position" value="right" ${position === "right" ? "checked" : ""}>
+                        右侧
+                    </label>
+                </p>
+            </div>
             <button onclick="this.parentElement.parentElement.remove();saveSettings()">保存</button>
         </div>
     `;
@@ -62,30 +70,26 @@ function showSettingsDialog() {
 function saveSettings() {
     const apiKey = document.getElementById("gemini-api-key").value;
     const proxyUrl = document.getElementById("proxy-url").value;
+    const position = document.querySelector('input[name="position"]:checked').value;
+    
     localStorage.setItem("gemini_api_key", apiKey);
     localStorage.setItem("proxy_url", proxyUrl);
-    showMessage("设置已保存！", 3000, 8);
-}
-
-// 切换位置
-function togglePosition() {
-    const waifu = document.querySelector("#waifu");
-    const currentPosition = getComputedStyle(waifu).right;
+    localStorage.setItem("waifu-position", position);
     
-    if (currentPosition !== "0px") {
-        // 切换到左侧
+    // 更新位置
+    const waifu = document.querySelector("#waifu");
+    if (position === "left") {
         waifu.style.right = "auto";
         waifu.style.left = "0";
-        localStorage.setItem("waifu-position", "left");
     } else {
-        // 切换到右侧
         waifu.style.right = "30px";
         waifu.style.left = "auto";
-        localStorage.setItem("waifu-position", "right");
     }
     
     // 更新工具栏位置
     updateToolPosition();
+    
+    showMessage("设置已保存！", 3000, 8);
 }
 
 // 更新工具栏位置
@@ -120,14 +124,15 @@ if (screen.width >= 768) {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
             apiPath: "https://live2d.fghrsh.net/api/",
-            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.6/",
-            tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
+            //cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.3.7/",
+            tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
         });
 
         // 添加自定义设置按钮和位置切换按钮
         setTimeout(() => {
             addSettingsButton();
-            addPositionToggle();
+            // 移除独立的位置切换按钮
+            // addPositionToggle();
             
             // 恢复保存的位置
             const savedPosition = localStorage.getItem("waifu-position");
