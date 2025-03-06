@@ -318,6 +318,8 @@
             o.getAttribute("first-time") ? (i(e),
             o.removeAttribute("first-time")) : (localStorage.removeItem("waifu-display"),
             document.getElementById("waifu").style.display = "",
+            // 确保在重新显示时清除模糊效果
+            document.getElementById("waifu").classList.remove('waifu-fading'),
             setTimeout(( () => {
                 document.getElementById("waifu").style.bottom = 0
             }

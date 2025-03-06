@@ -332,3 +332,7 @@
     opacity: 0;
     transition: opacity 0.5s ease;
 }
+
+#waifu-tool span {
+    transition: opacity 0.3s ease;
+}
