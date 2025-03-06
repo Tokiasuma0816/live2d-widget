@@ -125,7 +125,7 @@
                     const style = document.createElement('style');
                     style.id = 'waifu-particles-style';
                     style.textContent = `
-                        @keyframes particle-fly {
+                        @keyframes waifu-particle-fly {
                             0% { transform: translate(0, 0) scale(1); opacity: 1; }
                             100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
                         }
@@ -135,13 +135,18 @@
                             pointer-events: none;
                             z-index: 10000;
                         }
+                        .waifu-fading {
+                            filter: blur(8px);
+                            opacity: 0;
+                            transform: scale(0.95);
+                            transition: opacity 1.2s ease, filter 1.2s ease, transform 1.2s ease;
+                        }
                     `;
                     document.head.appendChild(style);
                 }
                 
-                // 淡出过渡效果
-                waifu.style.transition = 'opacity 0.5s';
-                waifu.style.opacity = '0.6';
+                // 应用模糊和淡出效果 - 降低不透明度到0，增加模糊效果
+                waifu.classList.add('waifu-fading');
                 
                 // 创建粒子效果
                 const rect = waifu.getBoundingClientRect();
@@ -157,17 +162,17 @@
                 `;
                 document.body.appendChild(container);
                 
-                // 创建100个粒子
-                for (let i = 0; i < 100; i++) {
-                    const size = 2 + Math.random() * 3;
+                // 创建300个粒子，使用慢一点的速度
+                for (let i = 0; i < 300; i++) {
+                    const size = Math.random() * 3 + 1; // 大小差异更大
                     const x = Math.random() * rect.width;
                     const y = Math.random() * rect.height;
                     const angle = Math.random() * Math.PI * 2;
                     const distance = 50 + Math.random() * 300;
                     const tx = Math.cos(angle) * distance;
                     const ty = Math.sin(angle) * distance;
-                    const duration = 0.5 + Math.random() * 0.8;
-                    const delay = Math.random() * 0.3;
+                    const duration = 1.2 + Math.random() * 1.0; // 更慢的动画 1.2-2.2秒
+                    const delay = Math.random() * 0.5; // 更长的延迟
                     const color = Math.random() > 0.5 ? '#7BC6FF' : '#64B5F6';
                     
                     const particle = document.createElement('div');
@@ -178,10 +183,10 @@
                         width: ${size}px;
                         height: ${size}px;
                         background-color: ${color};
-                        opacity: 0.8;
+                        opacity: ${0.3 + Math.random() * 0.5}; /* 较低的透明度 */
                         --tx: ${tx}px;
                         --ty: ${ty}px;
-                        animation: particle-fly ${duration}s ease-out ${delay}s forwards;
+                        animation: waifu-particle-fly ${duration}s ease-out ${delay}s forwards;
                     `;
                     container.appendChild(particle);
                 }
@@ -191,7 +196,7 @@
                     waifu.style.display = 'none';
                     container.remove();
                     document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
-                }, 1000);
+                }, 1800); // 确保足够长的时间让动画和模糊效果完成
             }
         }
     };
