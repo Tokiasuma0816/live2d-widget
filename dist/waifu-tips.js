@@ -306,66 +306,52 @@
             fetch(t.waifuPath).then((e => e.json())).then(c)
         }()
     }
+    
+    // 简化initWidget初始化函数
     window.initWidget = function(e, t) {
         "string" == typeof e && (e = {
             waifuPath: e,
             apiPath: t
         });
         
-        // 确保DOM已经加载完成
-        const initializeWaifu = () => {
-            if (!document.body) {
-                console.warn("Document body not ready yet, retrying in 10ms...");
-                setTimeout(initializeWaifu, 10);
-                return;
-            }
-            
-            document.body.insertAdjacentHTML("beforeend", '<div id="waifu-toggle">\n            <span>看板娘</span>\n        </div>');
-            const o = document.getElementById("waifu-toggle");
-            o.addEventListener("click", ( () => {
-                o.classList.remove("waifu-toggle-active"),
-                o.getAttribute("first-time") ? (i(e),
-                o.removeAttribute("first-time")) : (localStorage.removeItem("waifu-display"),
-                document.getElementById("waifu").style.display = "",
-                // 确保在重新显示时清除模糊效果
-                document.getElementById("waifu").classList.remove('waifu-fading'),
-                setTimeout(( () => {
-                    document.getElementById("waifu").style.bottom = 0
-                }
-                ), 0))
-            }
-            )),
-            localStorage.getItem("waifu-display") && Date.now() - localStorage.getItem("waifu-display") <= 864e5 ? (o.setAttribute("first-time", !0),
-            setTimeout(( () => {
-                o.classList.add("waifu-toggle-active")
-            }
-            ), 0)) : i(e);
-            
-            // 导出全局的显示消息函数，确保它总是可用
-            window.showMessage = function(text, timeout) {
-                o(text, timeout || 4000, 9);
-            };
-        };
+        document.body.insertAdjacentHTML("beforeend", '<div id="waifu-toggle">\n            <span>看板娘</span>\n        </div>');
+        const o = document.getElementById("waifu-toggle");
         
-        // 启动初始化过程
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeWaifu);
+        o.addEventListener("click", () => {
+            o.classList.remove("waifu-toggle-active");
+            if (o.getAttribute("first-time")) {
+                i(e);
+                o.removeAttribute("first-time");
+            } else {
+                localStorage.removeItem("waifu-display");
+                document.getElementById("waifu").style.display = "";
+                document.getElementById("waifu").classList.remove('waifu-fading');
+                setTimeout(() => {
+                    document.getElementById("waifu").style.bottom = 0;
+                }, 0);
+            }
+        });
+        
+        if (localStorage.getItem("waifu-display") && Date.now() - localStorage.getItem("waifu-display") <= 864e5) {
+            o.setAttribute("first-time", true);
+            setTimeout(() => {
+                o.classList.add("waifu-toggle-active");
+            }, 0);
         } else {
-            initializeWaifu();
+            i(e);
         }
-    }
+        
+        // 导出全局的显示消息函数
+        window.showMessage = function(text, timeout) {
+            o(text, timeout || 4000, 9);
+        };
+    };
     
-    // 创建粒子爆炸效果 - 保留这个函数但不再错误调用
+    // 简化粒子爆炸效果函数
     function createParticleExplosion(element, particleCount = 150) {
         if (!element) return Promise.resolve();
         
         const rect = element.getBoundingClientRect();
-        
-        // 确定粒子颜色 - 使用柔和的粒子颜色
-        const primaryColor = '#7BC6FF';
-        const secondaryColor = '#64B5F6';
-        
-        // 创建粒子容器
         const container = document.createElement('div');
         container.className = 'particle-container';
         container.style.cssText = `
@@ -386,77 +372,36 @@
             style.id = 'waifu-particle-style';
             style.textContent = `
                 @keyframes waifu-particle-fly {
-                    0% {
-                        transform: translate(0, 0) scale(1);
-                        opacity: var(--opacity, 1);
-                    }
-                    100% {
-                        transform: translate(var(--tx), var(--ty)) scale(0);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes waifu-sparkle-fly {
-                    0% {
-                        transform: translate(0, 0) scale(1);
-                        opacity: 1;
-                    }
-                    30% {
-                        opacity: 0.8;
-                        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(1.2);
-                    }
-                    100% {
-                        transform: translate(var(--tx), var(--ty)) scale(0);
-                        opacity: 0;
-                    }
+                    0% { transform: translate(0, 0) scale(1); opacity: var(--opacity, 1); }
+                    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
                 }
                 
                 .waifu-deleting {
-                    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+                    transition: opacity 0.3s ease-out;
                     opacity: 0.6;
-                    position: relative;
-                    overflow: visible !important;
                     pointer-events: none;
                 }
             `;
             document.head.appendChild(style);
         }
         
-        // 记录粒子数组
-        const particles = [];
-        
-        // 先添加模糊和隐去效果
         element.classList.add('waifu-deleting');
         
         // 创建粒子
         for (let i = 0; i < particleCount; i++) {
-            // 统一粒子尺寸为小圆点
             const size = 2 + Math.random() * 2;
-                         
-            // 均匀分布在元素中
             const x = Math.random() * rect.width;
             const y = Math.random() * rect.height;
-            
-            // 随机扩散方向和距离
             const angle = Math.random() * Math.PI * 2;
-            // 扩散距离更加随机，有些远有些近
-            const distance = 50 + Math.random() * 300; 
+            const distance = 50 + Math.random() * 300;
             const tx = Math.cos(angle) * distance;
             const ty = Math.sin(angle) * distance;
+            const duration = 0.5 + Math.random() * 0.7;
+            const delay = Math.random() * 0.3;
+            const color = Math.random() > 0.3 ? '#7BC6FF' : '#64B5F6';
             
-            // 随机速度和透明度
-            const duration = 0.5 + Math.random() * 0.7; // 0.5-1.2秒
-            const delay = Math.random() * 0.3; // 0-0.3秒延迟
-            const opacity = 0.7 + Math.random() * 0.3; // 随机初始透明度
-            
-            // 随机选择颜色
-            const color = Math.random() > 0.3 ? primaryColor : secondaryColor;
-            
-            // 创建粒子元素
             const particle = document.createElement('div');
             particle.className = 'waifu-particle';
-            
-            // 基本样式
             particle.style.cssText = `
                 position: absolute;
                 left: ${x}px;
@@ -465,8 +410,7 @@
                 height: ${size}px;
                 background-color: ${color};
                 border-radius: 50%;
-                opacity: ${opacity};
-                box-shadow: 0 0 2px rgba(255,255,255,0.3);
+                opacity: ${0.7 + Math.random() * 0.3};
                 transform-origin: center center;
                 z-index: 10000;
                 --tx: ${tx}px;
@@ -475,52 +419,13 @@
             `;
             
             container.appendChild(particle);
-            particles.push(particle);
         }
         
-        // 添加一些特殊的"闪光"粒子
-        for (let i = 0; i < Math.floor(particleCount / 10); i++) {
-            const x = Math.random() * rect.width;
-            const y = Math.random() * rect.height;
-            
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 60 + Math.random() * 200;
-            const tx = Math.cos(angle) * distance;
-            const ty = Math.sin(angle) * distance;
-            
-            const size = 3 + Math.random() * 2; // 闪光粒子稍微大一点
-            const duration = 0.4 + Math.random() * 0.5;
-            const delay = Math.random() * 0.2;
-            
-            const sparkle = document.createElement('div');
-            sparkle.className = 'waifu-sparkle';
-            sparkle.style.cssText = `
-                position: absolute;
-                left: ${x}px;
-                top: ${y}px;
-                width: ${size}px;
-                height: ${size}px;
-                background-color: white;
-                border-radius: 50%;
-                opacity: 0.9;
-                box-shadow: 0 0 3px rgba(255,255,255,0.8);
-                transform-origin: center center;
-                z-index: 10001;
-                --tx: ${tx}px;
-                --ty: ${ty}px;
-                animation: waifu-sparkle-fly ${duration}s ease-out ${delay}s forwards;
-            `;
-            
-            container.appendChild(sparkle);
-            particles.push(sparkle);
-        }
-        
-        // 等待动画完成后移除元素
         return new Promise(resolve => {
             setTimeout(() => {
                 container.remove();
                 resolve();
-            }, 1200); // 给动画足够的时间完成
+            }, 1200);
         });
     }
 }();

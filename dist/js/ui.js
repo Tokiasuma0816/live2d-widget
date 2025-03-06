@@ -62,15 +62,11 @@ function toggleDropdownHint() {
     }, 2500);
 }
 
-// Live2D 消息显示
+// Live2D 消息显示 - 简化版
 function showLive2DMessage(text, timeout = 8000) {
     if (typeof window.showMessage === "function") {
-        console.log("显示Live2D消息: ", text.substring(0, 30) + (text.length > 30 ? "..." : ""));
         window.showMessage(text, timeout);
     } else {
-        console.warn("Live2D showMessage 函数不可用，正在使用备用方法");
-        
-        // 备用方法：尝试直接操作DOM
         try {
             const tips = document.getElementById("waifu-tips");
             if (tips) {
@@ -83,24 +79,23 @@ function showLive2DMessage(text, timeout = 8000) {
                 }, timeout);
             }
         } catch (e) {
-            console.error("备用消息显示方法失败:", e);
+            console.error("消息显示失败:", e);
         }
     }
 }
 
-// 初始化函数
+// 初始化函数 - 简化版
 document.addEventListener("DOMContentLoaded", function () {
-    // 设置初始位置
     const waifu = document.querySelector("#waifu");
     if (waifu) {
         waifu.style.bottom = "0";
         waifu.style.right = "30px";
+        
+        waifu.addEventListener("click", () => {
+            const userInput = document.getElementById("user-input");
+            if (userInput) userInput.focus();
+        });
     }
-    
-    // 添加点击事件
-    waifu?.addEventListener("click", () => {
-        document.getElementById("user-input").focus();
-    });
     
     // 添加输入框动画效果
     const inputContainer = document.getElementById("input-container");

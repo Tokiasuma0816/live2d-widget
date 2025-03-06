@@ -1,41 +1,34 @@
 // 全局状态
-// 在文件开头添加
-// 全局状态
 let notionScriptRunning = false;
-let pythonServiceAvailable = false; // 添加服务可用性状态
+let pythonServiceAvailable = false;
 
-// 修改 checkServerStatus 函数
+// 简化服务状态检查函数
 async function checkServerStatus() {
     try {
-        // 添加超时控制
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
         
         const response = await fetch('http://localhost:5000/health', {
-            // 使用AbortController而不是AbortSignal.timeout (兼容性更好)
             signal: controller.signal
         }).finally(() => clearTimeout(timeoutId));
         
         if (!response.ok) throw new Error('Server not healthy');
-        pythonServiceAvailable = true; // 设置服务可用状态
+        pythonServiceAvailable = true;
         return true;
     } catch (error) {
-        console.warn("Python 服务检查失败:", error.name === "AbortError" ? "请求超时" : error.message);
-        pythonServiceAvailable = false; // 设置服务不可用状态
+        console.warn("Python 服务检查失败:", error.message);
+        pythonServiceAvailable = false;
         
-        // 使用安全的方式调用showLive2DMessage
         try {
-            showLive2DMessage("Python 服务未启动或无法访问，部分功能将不可用", 5000);
-        } catch (e) {
-            console.error("无法显示消息:", e);
-        }
+            window.showMessage && window.showMessage("Python 服务未启动，部分功能将不可用", 5000);
+        } catch (e) {}
         
-        updateNotionStatusUnavailable(); // 添加新的UI更新函数
+        updateNotionStatusUnavailable();
         return false;
     }
 }
 
-// 添加新函数: 更新UI显示服务不可用
+// 更新UI显示服务不可用
 function updateNotionStatusUnavailable() {
     const statusEl = document.getElementById('notion-status');
     const btnEl = document.querySelector('.script-btn');
@@ -43,32 +36,26 @@ function updateNotionStatusUnavailable() {
     if (!statusEl || !btnEl) return;
     
     statusEl.textContent = '服务不可用';
-    statusEl.style.color = '#ef4444'; // 红色提示
+    statusEl.style.color = '#ef4444';
     btnEl.textContent = '需要本地Python';
-    btnEl.style.background = '#94a3b8'; // 灰色按钮
-    btnEl.disabled = true; // 禁用按钮
+    btnEl.style.background = '#94a3b8';
+    btnEl.disabled = true;
     
-    // 添加提示信息到Notion设置区域
     const notionSection = document.getElementById('notion-section');
-    if (notionSection) {
-        // 检查是否已存在提示
-        let noticeEl = document.getElementById('python-service-notice');
-        if (!noticeEl) {
-            noticeEl = document.createElement('div');
-            noticeEl.id = 'python-service-notice';
-            noticeEl.className = 'service-notice';
-            noticeEl.innerHTML = `
-                <div class="notice-icon">⚠️</div>
-                <div class="notice-content">
-                    <strong>Python服务未运行</strong>
-                    <p>Notion同步和数学公式格式化功能需要本地Python服务支持。如果您已部署到网络，此功能将不可用。</p>
-                </div>
-            `;
-            notionSection.insertBefore(noticeEl, notionSection.firstChild);
-        }
+    if (notionSection && !document.getElementById('python-service-notice')) {
+        const noticeEl = document.createElement('div');
+        noticeEl.id = 'python-service-notice';
+        noticeEl.className = 'service-notice';
+        noticeEl.innerHTML = `
+            <div class="notice-icon">⚠️</div>
+            <div class="notice-content">
+                <strong>Python服务未运行</strong>
+                <p>Notion同步和数学公式格式化功能需要本地Python服务支持。</p>
+            </div>
+        `;
+        notionSection.insertBefore(noticeEl, notionSection.firstChild);
     }
     
-    // 修改测试按钮状态
     const testBtn = document.getElementById('test-notion-btn');
     if (testBtn) {
         testBtn.disabled = true;
@@ -77,12 +64,10 @@ function updateNotionStatusUnavailable() {
     }
 }
 
-// 格式化 Notion 页面 ID
+// 格式化 Notion 页面 ID - 简化版
 function formatNotionPageId(pageId) {
-    // 移除非字母数字字符
     const cleanId = pageId.replace(/[^a-zA-Z0-9]/g, '');
     
-    // 如果长度为32，则添加分隔符
     if (cleanId.length === 32) {
         return `${cleanId.slice(0,8)}-${cleanId.slice(8,12)}-${cleanId.slice(12,16)}-${cleanId.slice(16,20)}-${cleanId.slice(20)}`;
     }
@@ -221,20 +206,15 @@ async function toggleNotionScript() {
     }
 }
 
-// 粒子消散效果动画
+// 粒子消散效果动画 - 简化版
 function particleExplosion(element) {
-    // 获取元素位置和尺寸
-    const rect = element.getBoundingClientRect();
-    // 创建粒子数
-    const particleCount = 30;
-    // 保存粒子元素的引用
-    const particles = [];
+    if (!element) return;
     
-    // 确定粒子颜色
+    const rect = element.getBoundingClientRect();
+    const particleCount = 30;
     const isUserMessage = element.classList.contains('user-message');
     const particleColor = isUserMessage ? '#9683EC' : '#64B5F6';
     
-    // 创建粒子容器 - 需要与消息元素相同大小和位置
     const container = document.createElement('div');
     container.className = 'particle-container';
     container.style.cssText = `
@@ -249,29 +229,19 @@ function particleExplosion(element) {
     `;
     document.body.appendChild(container);
     
-    // 先添加模糊和隐去效果
     element.classList.add('deleting');
     
-    // 创建统一大小和形状的粒子
     for (let i = 0; i < particleCount; i++) {
-        // 设置统一的粒子尺寸
         const size = 2;
-        
-        // 随机位置（均匀分布在元素范围内）
         const startX = Math.random() * rect.width;
         const startY = Math.random() * rect.height;
-        
-        // 设置随机目标位置（飞散方向）
         const angle = Math.random() * Math.PI * 2;
         const distance = 100 + Math.random() * 100;
         const endX = distance * Math.cos(angle);
         const endY = distance * Math.sin(angle);
         
-        // 创建粒子
         const particle = document.createElement('div');
         particle.classList.add('particle');
-        
-        // 设置粒子样式 - 统一为小圆点
         particle.style.cssText = `
             position: absolute;
             width: ${size}px;
@@ -285,14 +255,10 @@ function particleExplosion(element) {
             animation: particle-fade 0.8s ease-out forwards;
         `;
         
-        // 将粒子添加到容器
         container.appendChild(particle);
-        particles.push(particle);
     }
     
-    // 等待动画完成后移除粒子和元素
     setTimeout(() => {
-        particles.forEach(p => p.remove());
         container.remove();
         element.remove();
     }, 800);
