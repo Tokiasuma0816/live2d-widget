@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.1/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.2/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -105,29 +105,42 @@ function saveSettings() {
     }
 }
 
-// 更新位置 - 简化版
+// 更新位置 - 修复位置逻辑
 function updatePosition() {
     const waifu = document.querySelector("#waifu");
     const tips = document.querySelector("#waifu-tips");
     const tool = document.querySelector("#waifu-tool");
-    if (!waifu || !tips || !tool) return;
+    
+    if (!waifu) return; // 安全检查
     
     const position = localStorage.getItem("waifu-position") || "right";
     
     if (position === "left") {
         waifu.style.right = "auto";
         waifu.style.left = "0";
-        tool.style.right = "auto";
-        tool.style.left = "10px";
-        tips.style.right = "auto";
-        tips.style.left = "20px";
+        
+        if (tool) {
+            tool.style.right = "auto";
+            tool.style.left = "10px";
+        }
+        
+        if (tips) {
+            tips.style.right = "auto";
+            tips.style.left = "20px";
+        }
     } else {
         waifu.style.right = "30px";
         waifu.style.left = "auto";
-        tool.style.right = "10px";
-        tool.style.left = "auto";
-        tips.style.right = "10px";
-        tips.style.left = "auto";
+        
+        if (tool) {
+            tool.style.right = "10px";
+            tool.style.left = "auto";
+        }
+        
+        if (tips) {
+            tips.style.right = "10px";
+            tips.style.left = "auto";
+        }
     }
 }
 
@@ -322,38 +335,65 @@ if (screen.width >= 768) {
 
                 // 延迟初始化，确保DOM已经完全加载
                 setTimeout(() => {
-                    const waifu = document.querySelector("#waifu");
-                    if (waifu) {
-                        waifu.classList.remove('waifu-fading');
-                        
-                        // 初始化位置
-                        updatePosition();
-                        
-                        // 添加设置按钮
-                        addSettingsButton();
-                        
-                        // 修复退出按钮的事件绑定
-                        const quitBtn = document.querySelector("#waifu-tool-quit");
-                        if (quitBtn) {
-                            quitBtn.addEventListener("click", window.quitLive2d || function() {
-                                const waifu = document.getElementById("waifu");
-                                if (waifu) {
-                                    localStorage.setItem("waifu-display", Date.now());
-                                    waifu.classList.add('waifu-fading');
-                                    setTimeout(() => {
-                                        waifu.style.display = 'none';
-                                        document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
-                                    }, 1800);
-                                }
-                            });
+                    try {
+                        const waifu = document.querySelector("#waifu");
+                        if (waifu) {
+                            waifu.classList.remove('waifu-fading');
+                            
+                            // 初始化位置
+                            updatePosition();
+                            
+                            // 添加设置按钮
+                            addSettingsButton();
+                            
+                            // 安全地绑定点击事件
+                            safelyAddClickListener(waifu);
+                            
+                            // 修复退出按钮的事件绑定
+                            const quitBtn = document.querySelector("#waifu-tool-quit");
+                            if (quitBtn) {
+                                quitBtn.addEventListener("click", window.quitLive2d || function() {
+                                    if (waifu) {
+                                        localStorage.setItem("waifu-display", Date.now());
+                                        waifu.classList.add('waifu-fading');
+                                        setTimeout(() => {
+                                            waifu.style.display = 'none';
+                                            const toggleBtn = document.getElementById("waifu-toggle");
+                                            if (toggleBtn) toggleBtn.classList.add("waifu-toggle-active");
+                                        }, 1800);
+                                    }
+                                });
+                            }
+                            
+                            // 添加错误捕获全局处理程序
+                            const canvas = document.getElementById("live2d");
+                            if (canvas) {
+                                canvas.addEventListener("error", (e) => {
+                                    console.warn("Canvas error caught:", e);
+                                    e.preventDefault();
+                                });
+                                
+                                // 防止点击错误
+                                canvas.addEventListener("click", (e) => {
+                                    try {
+                                        // 点击事件可能会导致hitTest错误
+                                        e.stopPropagation();
+                                    } catch (err) {
+                                        console.log("Canvas click handled safely");
+                                        e.preventDefault();
+                                    }
+                                });
+                            }
                         }
+                    } catch (innerError) {
+                        console.error("Live2D 初始化内部错误:", innerError);
                     }
-                }, 1000);
+                }, 1500); // 增加延迟，确保模型完全加载
             } catch (e) {
-                console.error("初始化看板娘时出错:", e);
+                console.error("Live2D 初始化过程出错:", e);
             }
         }).catch(e => {
-            console.error("加载看板娘资源失败:", e);
+            console.error("加载Live2D资源失败:", e);
         });
     };
 
@@ -363,6 +403,15 @@ if (screen.width >= 768) {
     } else {
         initLive2d();
     }
+    
+    // 添加全局错误处理
+    window.addEventListener("error", (e) => {
+        // 只拦截Live2D相关错误
+        if (e.filename && e.filename.includes("live2d")) {
+            console.warn("Caught Live2D error:", e.message);
+            e.preventDefault();
+        }
+    }, true);
 }
 
 // Gemini API 相关函数
