@@ -333,6 +333,34 @@
     transition: opacity 0.5s ease;
 }
 
+/* 确保所有工具栏按钮共享相同的过渡效果 */
 #waifu-tool span {
     transition: opacity 0.3s ease;
+}
+
+/* 设置按钮专用样式 */
+#waifu-tool-settings {
+    display: block;
+    height: 30px;
+    text-align: center;
+    opacity: 1; /* 确保与工具栏其他按钮一样 */
+    transition: opacity 0.3s;
+}
+
+#waifu-tool-settings svg {
+    fill: #7b8c9d;
+    cursor: pointer;
+    height: 25px;
+    transition: fill .3s;
+}
+
+#waifu-tool-settings svg:hover {
+    fill: #0684bd; /* 与其他工具按钮相同的悬停效果 */
+}
+
+/* 当看板娘隐藏时，设置按钮也应该隐藏 */
+#waifu.waifu-fading #waifu-tool-settings,
+#waifu.waifu-hidden #waifu-tool-settings {
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }

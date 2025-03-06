@@ -310,34 +310,51 @@
         "string" == typeof e && (e = {
             waifuPath: e,
             apiPath: t
-        }),
-        document.body.insertAdjacentHTML("beforeend", '<div id="waifu-toggle">\n            <span>看板娘</span>\n        </div>');
-        const o = document.getElementById("waifu-toggle");
-        o.addEventListener("click", ( () => {
-            o.classList.remove("waifu-toggle-active"),
-            o.getAttribute("first-time") ? (i(e),
-            o.removeAttribute("first-time")) : (localStorage.removeItem("waifu-display"),
-            document.getElementById("waifu").style.display = "",
-            // 确保在重新显示时清除模糊效果
-            document.getElementById("waifu").classList.remove('waifu-fading'),
-            setTimeout(( () => {
-                document.getElementById("waifu").style.bottom = 0
-            }
-            ), 0))
-        }
-        )),
-        localStorage.getItem("waifu-display") && Date.now() - localStorage.getItem("waifu-display") <= 864e5 ? (o.setAttribute("first-time", !0),
-        setTimeout(( () => {
-            o.classList.add("waifu-toggle-active")
-        }
-        ), 0)) : i(e)
+        });
         
-        // 导出全局的显示消息函数，确保它总是可用
-        window.showMessage = function(text, timeout) {
-            o(text, timeout || 4000, 9);
+        // 确保DOM已经加载完成
+        const initializeWaifu = () => {
+            if (!document.body) {
+                console.warn("Document body not ready yet, retrying in 10ms...");
+                setTimeout(initializeWaifu, 10);
+                return;
+            }
+            
+            document.body.insertAdjacentHTML("beforeend", '<div id="waifu-toggle">\n            <span>看板娘</span>\n        </div>');
+            const o = document.getElementById("waifu-toggle");
+            o.addEventListener("click", ( () => {
+                o.classList.remove("waifu-toggle-active"),
+                o.getAttribute("first-time") ? (i(e),
+                o.removeAttribute("first-time")) : (localStorage.removeItem("waifu-display"),
+                document.getElementById("waifu").style.display = "",
+                // 确保在重新显示时清除模糊效果
+                document.getElementById("waifu").classList.remove('waifu-fading'),
+                setTimeout(( () => {
+                    document.getElementById("waifu").style.bottom = 0
+                }
+                ), 0))
+            }
+            )),
+            localStorage.getItem("waifu-display") && Date.now() - localStorage.getItem("waifu-display") <= 864e5 ? (o.setAttribute("first-time", !0),
+            setTimeout(( () => {
+                o.classList.add("waifu-toggle-active")
+            }
+            ), 0)) : i(e);
+            
+            // 导出全局的显示消息函数，确保它总是可用
+            window.showMessage = function(text, timeout) {
+                o(text, timeout || 4000, 9);
+            };
         };
+        
+        // 启动初始化过程
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeWaifu);
+        } else {
+            initializeWaifu();
+        }
     }
-
+    
     // 创建粒子爆炸效果 - 保留这个函数但不再错误调用
     function createParticleExplosion(element, particleCount = 150) {
         if (!element) return Promise.resolve();

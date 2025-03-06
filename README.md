@@ -101,24 +101,6 @@ https://example.com/path/to/live2d-widget/
 ```
 就可以加载了。
 
-## 鸣谢
-
-<a href="https://www.browserstack.com/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" height="80" srcset="https://d98b8t1nnulk5.cloudfront.net/production/images/layout/logo-header.png?1469004780">
-    <source media="(prefers-color-scheme: light)" height="80" srcset="https://live.browserstack.com/images/opensource/browserstack-logo.svg">
-    <img alt="BrowserStack Logo" height="80" src="https://live.browserstack.com/images/opensource/browserstack-logo.svg">
-  </picture>
-</a>
-
-<a href="https://www.jsdelivr.com">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" height="80" srcset="https://raw.githubusercontent.com/jsdelivr/jsdelivr-media/master/white/svg/jsdelivr-logo-horizontal.svg">
-    <source media="(prefers-color-scheme: light)" height="80" srcset="https://raw.githubusercontent.com/jsdelivr/jsdelivr-media/master/default/svg/jsdelivr-logo-horizontal.svg">
-    <img alt="jsDelivr Logo" height="80" src="https://raw.githubusercontent.com/jsdelivr/jsdelivr-media/master/default/svg/jsdelivr-logo-horizontal.svg">
-  </picture>
-</a>
-
 > 感谢 jsDelivr 提供的 CDN 服务。  
 > Thanks jsDelivr for providing public CDN service.
 

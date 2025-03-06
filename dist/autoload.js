@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.9/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.0/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -21,13 +21,10 @@ function loadExternalResource(url, type) {
     });
 }
 
-// 添加设置按钮到工具栏
+// 添加设置按钮到工具栏 - 简化版
 function addSettingsButton() {
     const tools = document.getElementById("waifu-tool");
-    if (!tools) {
-        console.warn("找不到waifu-tool元素，无法添加设置按钮");
-        return; // 添加安全检查
-    }
+    if (!tools) return;
     
     const settingsButton = document.createElement("span");
     settingsButton.id = "waifu-tool-settings";
@@ -36,7 +33,7 @@ function addSettingsButton() {
     tools.appendChild(settingsButton);
 }
 
-// 显示设置对话框
+// 显示设置对话框 - 简化版
 function showSettingsDialog() {
     const apiKey = localStorage.getItem("gemini_api_key") || "";
     const proxyUrl = localStorage.getItem("proxy_url") || "";
@@ -87,53 +84,37 @@ function showLive2dMessage(text, timeout = 4000) {
     }, timeout);
 }
 
-// 保存设置
+// 保存设置 - 简化版
 function saveSettings() {
     try {
         const apiKey = document.getElementById("gemini-api-key").value;
         const proxyUrl = document.getElementById("proxy-url").value;
         const position = document.querySelector('input[name="position"]:checked').value;
         
-        // 保存设置到 localStorage
         localStorage.setItem("gemini_api_key", apiKey);
         localStorage.setItem("proxy_url", proxyUrl);
         localStorage.setItem("waifu-position", position);
         
-        // 强制更新位置和工具栏
-        updateToolPosition();
+        updatePosition();
         
-        // 确保设置已保存后再关闭对话框
-        const dialog = document.querySelector("#settings-dialog");
-        if (dialog) {
-            dialog.remove();
-        }
-        
-        // 显示保存成功消息
-        showMessage("设置已保存！", 3000, 8);
-        
-        // 验证设置是否成功保存
-        const savedPosition = localStorage.getItem("waifu-position");
-        if (savedPosition !== position) {
-            console.error("Position setting not saved correctly");
-            showMessage("设置保存失败，请重试", 3000, 8);
-        }
+        document.getElementById("settings-dialog").remove();
+        showLive2dMessage("设置已保存！", 3000);
     } catch (error) {
-        console.error("Save settings failed:", error);
-        showMessage("设置保存失败，请重试", 3000, 8);
+        console.error("设置保存失败:", error);
+        showLive2dMessage("设置保存失败", 3000);
     }
 }
 
-// 更新工具栏位置
-function updateToolPosition() {
+// 更新位置 - 简化版
+function updatePosition() {
     const waifu = document.querySelector("#waifu");
     const tips = document.querySelector("#waifu-tips");
     const tool = document.querySelector("#waifu-tool");
+    if (!waifu || !tips || !tool) return;
     
-    // 获取当前位置
     const position = localStorage.getItem("waifu-position") || "right";
     
     if (position === "left") {
-        // 左侧布局
         waifu.style.right = "auto";
         waifu.style.left = "0";
         tool.style.right = "auto";
@@ -141,7 +122,6 @@ function updateToolPosition() {
         tips.style.right = "auto";
         tips.style.left = "20px";
     } else {
-        // 右侧布局
         waifu.style.right = "30px";
         waifu.style.left = "auto";
         tool.style.right = "10px";
@@ -149,38 +129,6 @@ function updateToolPosition() {
         tips.style.right = "10px";
         tips.style.left = "auto";
     }
-}
-
-// 初始化位置和工具栏
-function initializePosition() {
-    const position = localStorage.getItem("waifu-position") || "right";
-    const waifu = document.querySelector("#waifu");
-    if (!waifu) return;
-
-    // 设置初始位置
-    if (position === "left") {
-        waifu.style.right = "auto";
-        waifu.style.left = "0";
-    } else {
-        waifu.style.right = "30px";
-        waifu.style.left = "auto";
-    }
-
-    // 更新工具栏位置
-    updateToolPosition();
-
-    // 添加位置变化监听
-    const observer = new MutationObserver(() => {
-        updateToolPosition();
-    });
-    
-    observer.observe(waifu, {
-        attributes: true,
-        attributeFilter: ['style']
-    });
-
-    // 添加全局消息显示函数
-    window.showMessage = showLive2dMessage;
 }
 
 // 创建粒子爆炸效果 (从聊天界面复制过来的)
@@ -357,60 +305,64 @@ function createParticleExplosion(element, particleCount = 150) {
 
 // 加载必要资源
 if (screen.width >= 768) {
-    Promise.all([
-        loadExternalResource(live2d_path + "waifu.css", "css"),
-        loadExternalResource(live2d_path + "live2d.min.js", "js"),
-        loadExternalResource(live2d_path + "waifu-tips.js", "js")
-    ]).then(() => {
-        // 初始化看板娘配置
-        initWidget({
-            waifuPath: live2d_path + "waifu-tips.json",
-            cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d_api@v1.0.8/",
-            tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
-        });
-
-        // 添加延迟初始化，确保DOM已经完全加载
-        setTimeout(() => {
+    // 确保在DOMContentLoaded后初始化
+    const initLive2d = () => {
+        Promise.all([
+            loadExternalResource(live2d_path + "waifu.css", "css"),
+            loadExternalResource(live2d_path + "live2d.min.js", "js"),
+            loadExternalResource(live2d_path + "waifu-tips.js", "js")
+        ]).then(() => {
             try {
-                const waifu = document.querySelector("#waifu");
-                if (waifu) {
-                    waifu.classList.remove('waifu-fading');
-                    
-                    // 尝试初始化位置
-                    initializePosition();
-                    
-                    // 安全检查后再添加设置按钮
-                    if (document.getElementById("waifu-tool")) {
+                // 初始化看板娘配置
+                initWidget({
+                    waifuPath: live2d_path + "waifu-tips.json",
+                    cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d_api@v1.0.8/",
+                    tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
+                });
+
+                // 延迟初始化，确保DOM已经完全加载
+                setTimeout(() => {
+                    const waifu = document.querySelector("#waifu");
+                    if (waifu) {
+                        waifu.classList.remove('waifu-fading');
+                        
+                        // 初始化位置
+                        updatePosition();
+                        
+                        // 添加设置按钮
                         addSettingsButton();
-                    } else {
-                        console.warn("找不到waifu-tool元素，跳过添加设置按钮");
+                        
+                        // 修复退出按钮的事件绑定
+                        const quitBtn = document.querySelector("#waifu-tool-quit");
+                        if (quitBtn) {
+                            quitBtn.addEventListener("click", window.quitLive2d || function() {
+                                const waifu = document.getElementById("waifu");
+                                if (waifu) {
+                                    localStorage.setItem("waifu-display", Date.now());
+                                    waifu.classList.add('waifu-fading');
+                                    setTimeout(() => {
+                                        waifu.style.display = 'none';
+                                        document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
+                                    }, 1800);
+                                }
+                            });
+                        }
                     }
-                    
-                    // 修复退出按钮的事件绑定
-                    const quitBtn = document.querySelector("#waifu-tool-quit");
-                    if (quitBtn) {
-                        console.log("找到退出按钮，重新绑定事件");
-                        quitBtn.addEventListener("click", window.quitLive2d || function() {
-                            console.log("执行默认退出函数");
-                            const waifu = document.getElementById("waifu");
-                            if (waifu) {
-                                localStorage.setItem("waifu-display", Date.now());
-                                waifu.classList.add('waifu-fading');
-                                setTimeout(() => {
-                                    waifu.style.display = 'none';
-                                    document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
-                                }, 1800);
-                            }
-                        });
-                    }
-                } else {
-                    console.warn("找不到waifu元素，跳过初始化");
-                }
-            } catch (error) {
-                console.error("Live2D 初始化过程中出错:", error);
+                }, 1000);
+            } catch (e) {
+                console.error("初始化看板娘时出错:", e);
             }
-        }, 1000);
-    });
+        }).catch(e => {
+            console.error("加载看板娘资源失败:", e);
+        });
+    };
+
+    // 确保DOM加载完成后初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLive2d);
+    } else {
+        initLive2d();
+    }
 }
 
 // Gemini API 相关函数
@@ -453,19 +405,7 @@ async function sendMessageToGemini(message) {
 
 // 全局showMessage函数
 window.showMessage = function(text, timeout) {
-    const tips = document.getElementById("waifu-tips");
-    if (!tips) {
-        console.warn("找不到waifu-tips元素，无法显示消息");
-        return;
-    }
-    
-    tips.innerHTML = text;
-    tips.classList.add("waifu-tips-active");
-    
-    clearTimeout(window._tipsTimer);
-    window._tipsTimer = setTimeout(() => {
-        tips.classList.remove("waifu-tips-active");
-    }, timeout || 4000);
+    showLive2dMessage(text, timeout || 4000);
 };
 
 console.log(`
