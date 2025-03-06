@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.7/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.8/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -364,7 +364,7 @@ if (screen.width >= 768) {
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
         });
 
-        // 添加延迟初始化
+        // 添加延迟初始化，确保DOM已经完全加载
         setTimeout(() => {
             addSettingsButton();
             initializePosition();
@@ -373,6 +373,24 @@ if (screen.width >= 768) {
             const waifu = document.querySelector("#waifu");
             if (waifu) {
                 waifu.classList.remove('waifu-fading');
+                
+                // 修复退出按钮的事件绑定
+                const quitBtn = document.querySelector("#waifu-tool-quit");
+                if (quitBtn) {
+                    console.log("找到退出按钮，重新绑定事件");
+                    quitBtn.addEventListener("click", window.quitLive2d || function() {
+                        console.log("执行默认退出函数");
+                        const waifu = document.getElementById("waifu");
+                        if (waifu) {
+                            localStorage.setItem("waifu-display", Date.now());
+                            waifu.classList.add('waifu-fading');
+                            setTimeout(() => {
+                                waifu.style.display = 'none';
+                                document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
+                            }, 1800);
+                        }
+                    });
+                }
             }
         }, 1000);
     });

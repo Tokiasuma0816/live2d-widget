@@ -333,32 +333,7 @@
         ), 0)) : i(e)
     }
 
-    // 找到原始退出功能并替换它
-    document.querySelector("#waifu-tool .fa-times").addEventListener("click", () => {
-        // 获取看板娘元素
-        const waifu = document.getElementById('waifu');
-        if (waifu) {
-            // 禁用其他工具按钮
-            const tools = document.querySelectorAll('#waifu-tool span');
-            tools.forEach(tool => {
-                tool.style.pointerEvents = 'none';
-            });
-            
-            // 执行粒子效果
-            createParticleExplosion(waifu, 150).then(() => {
-                // 完成后执行原始的退出逻辑
-                localStorage.setItem('waifu-display', Date.now());
-                
-                // 在粒子效果完成后再执行原始的隐藏动画
-                waifu.style.bottom = '-500px';
-                setTimeout(() => {
-                    waifu.style.display = 'none';
-                }, 3000);
-            });
-        }
-    });
-
-    // 创建粒子爆炸效果
+    // 创建粒子爆炸效果 - 保留这个函数但不再错误调用
     function createParticleExplosion(element, particleCount = 150) {
         if (!element) return Promise.resolve();
         
