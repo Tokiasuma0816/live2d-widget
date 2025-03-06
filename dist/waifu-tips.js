@@ -331,6 +331,11 @@
             o.classList.add("waifu-toggle-active")
         }
         ), 0)) : i(e)
+        
+        // 导出全局的显示消息函数，确保它总是可用
+        window.showMessage = function(text, timeout) {
+            o(text, timeout || 4000, 9);
+        };
     }
 
     // 创建粒子爆炸效果 - 保留这个函数但不再错误调用

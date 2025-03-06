@@ -7,16 +7,29 @@ let pythonServiceAvailable = false; // 添加服务可用性状态
 // 修改 checkServerStatus 函数
 async function checkServerStatus() {
     try {
+        // 添加超时控制
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        
         const response = await fetch('http://localhost:5000/health', {
-            // 添加超时设置避免长时间等待
-            signal: AbortSignal.timeout(2000)
-        });
+            // 使用AbortController而不是AbortSignal.timeout (兼容性更好)
+            signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
+        
         if (!response.ok) throw new Error('Server not healthy');
         pythonServiceAvailable = true; // 设置服务可用状态
         return true;
-    } catch {
+    } catch (error) {
+        console.warn("Python 服务检查失败:", error.name === "AbortError" ? "请求超时" : error.message);
         pythonServiceAvailable = false; // 设置服务不可用状态
-        showLive2DMessage("Python 服务未启动或无法访问，部分功能将不可用", 5000);
+        
+        // 使用安全的方式调用showLive2DMessage
+        try {
+            showLive2DMessage("Python 服务未启动或无法访问，部分功能将不可用", 5000);
+        } catch (e) {
+            console.error("无法显示消息:", e);
+        }
+        
         updateNotionStatusUnavailable(); // 添加新的UI更新函数
         return false;
     }

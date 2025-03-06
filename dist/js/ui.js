@@ -68,7 +68,23 @@ function showLive2DMessage(text, timeout = 8000) {
         console.log("显示Live2D消息: ", text.substring(0, 30) + (text.length > 30 ? "..." : ""));
         window.showMessage(text, timeout);
     } else {
-        console.warn("Live2D showMessage 函数不可用");
+        console.warn("Live2D showMessage 函数不可用，正在使用备用方法");
+        
+        // 备用方法：尝试直接操作DOM
+        try {
+            const tips = document.getElementById("waifu-tips");
+            if (tips) {
+                tips.innerHTML = text;
+                tips.classList.add("waifu-tips-active");
+                
+                clearTimeout(window._backupTipsTimer);
+                window._backupTipsTimer = setTimeout(() => {
+                    tips.classList.remove("waifu-tips-active");
+                }, timeout);
+            }
+        } catch (e) {
+            console.error("备用消息显示方法失败:", e);
+        }
     }
 }
 
