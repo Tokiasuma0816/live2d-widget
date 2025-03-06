@@ -83,6 +83,27 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("user-input").focus();
     });
     
+    // 添加输入框动画效果
+    const inputContainer = document.getElementById("input-container");
+    const userInput = document.getElementById("user-input");
+    
+    // 检测是否支持模糊效果
+    if (CSS && CSS.supports && 
+        !CSS.supports('backdrop-filter', 'blur(10px)') && 
+        !CSS.supports('-webkit-backdrop-filter', 'blur(10px)')) {
+        // 如果浏览器不支持backdrop-filter，则使用半透明背景
+        inputContainer.style.background = 'rgba(255, 255, 255, 0.95)';
+    }
+    
+    // 输入框焦点动画
+    userInput.addEventListener("focus", () => {
+        inputContainer.classList.add("focused");
+    });
+    
+    userInput.addEventListener("blur", () => {
+        inputContainer.classList.remove("focused");
+    });
+    
     // 加载配置
     loadConfig();
 });

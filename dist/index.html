@@ -9,13 +9,15 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/settings.css">
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.3/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.4/dist/autoload.js"></script>
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/notion.js"></script>
     <script src="js/notion-debug.js"></script>
     <script src="js/chat.js"></script>
+    <!-- 添加看板娘自定义退出效果脚本 -->
+    <script src="custom-waify-quit.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -44,7 +46,9 @@
                 </svg>
             </button>
         </div>
-        <div id="messages"></div>
+        <div id="messages">
+            <!-- 消息将在此显示，用户和AI消息都可以通过hover时显示的删除按钮删除 -->
+        </div>
         <div id="input-container">
             <input type="text" id="user-input" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()" title="发送">

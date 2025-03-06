@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.3/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.4/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -178,6 +178,178 @@ function initializePosition() {
     window.showMessage = showLive2dMessage;
 }
 
+// 创建粒子爆炸效果 (从聊天界面复制过来的)
+function createParticleExplosion(element, particleCount = 150) {
+    if (!element) return Promise.resolve();
+    
+    const rect = element.getBoundingClientRect();
+    
+    // 确定粒子颜色 - 使用柔和的粒子颜色
+    const primaryColor = '#7BC6FF';
+    const secondaryColor = '#64B5F6';
+    
+    // 创建粒子容器
+    const container = document.createElement('div');
+    container.className = 'particle-container';
+    container.style.cssText = `
+        position: absolute;
+        left: ${rect.left}px;
+        top: ${rect.top}px;
+        width: ${rect.width}px;
+        height: ${rect.height}px;
+        overflow: visible;
+        pointer-events: none;
+        z-index: 10000;
+    `;
+    document.body.appendChild(container);
+    
+    // 记录粒子数组
+    const particles = [];
+    
+    // 先添加模糊和隐去效果
+    element.classList.add('deleting');
+    
+    // 创建粒子
+    for (let i = 0; i < particleCount; i++) {
+        // 统一粒子尺寸为小圆点
+        const size = 2 + Math.random() * 2;
+                     
+        // 均匀分布在元素中
+        const x = Math.random() * rect.width;
+        const y = Math.random() * rect.height;
+        
+        // 随机扩散方向和距离
+        const angle = Math.random() * Math.PI * 2;
+        // 扩散距离更加随机，有些远有些近
+        const distance = 30 + Math.random() * 300; 
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        // 随机速度和透明度
+        const duration = 0.4 + Math.random() * 0.8; // 0.4-1.2秒
+        const delay = Math.random() * 0.3; // 0-0.3秒延迟
+        const opacity = 0.7 + Math.random() * 0.3; // 随机初始透明度
+        
+        // 随机选择颜色
+        const color = Math.random() > 0.3 ? 
+                      primaryColor : 
+                      secondaryColor;
+        
+        // 创建粒子元素
+        const particle = document.createElement('div');
+        particle.className = 'live2d-particle';
+        
+        // 基本样式
+        particle.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            width: ${size}px;
+            height: ${size}px;
+            background-color: ${color};
+            border-radius: 50%;
+            opacity: ${opacity};
+            box-shadow: 0 0 1px rgba(255,255,255,0.3);
+            transform-origin: center center;
+            z-index: 10000;
+            --tx: ${tx}px;
+            --ty: ${ty}px;
+            animation: particle-fly ${duration}s ease-out ${delay}s forwards;
+        `;
+        
+        container.appendChild(particle);
+        particles.push(particle);
+    }
+    
+    // 添加一些特殊的"闪光"粒子
+    for (let i = 0; i < Math.floor(particleCount / 15); i++) {
+        const x = Math.random() * rect.width;
+        const y = Math.random() * rect.height;
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 180;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        const size = 2 + Math.random() * 1; // 闪光粒子稍微大一点
+        const duration = 0.3 + Math.random() * 0.4;
+        const delay = Math.random() * 0.2;
+        
+        const sparkle = document.createElement('div');
+        sparkle.className = 'live2d-sparkle';
+        sparkle.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            width: ${size}px;
+            height: ${size}px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.9;
+            box-shadow: 0 0 2px rgba(255,255,255,0.8);
+            transform-origin: center center;
+            z-index: 10001;
+            --tx: ${tx}px;
+            --ty: ${ty}px;
+            animation: sparkle-fly ${duration}s ease-out ${delay}s forwards;
+        `;
+        
+        container.appendChild(sparkle);
+        particles.push(sparkle);
+    }
+    
+    // 添加粒子动画样式
+    if (!document.getElementById('particle-animations')) {
+        const style = document.createElement('style');
+        style.id = 'particle-animations';
+        style.textContent = `
+            @keyframes particle-fly {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                    opacity: var(--opacity, 1);
+                }
+                100% {
+                    transform: translate(var(--tx), var(--ty)) scale(0);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes sparkle-fly {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                    opacity: 1;
+                }
+                30% {
+                    opacity: 0.8;
+                    transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(1.2);
+                }
+                100% {
+                    transform: translate(var(--tx), var(--ty)) scale(0);
+                    opacity: 0;
+                }
+            }
+            
+            .deleting {
+                transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+                opacity: 0;
+                transform: scale(0.95);
+                position: relative;
+                overflow: visible !important;
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // 等待动画完成后移除元素
+    return new Promise(resolve => {
+        setTimeout(() => {
+            container.remove(); // 移除粒子容器
+            resolve();
+        }, 1500); // 给动画足够的时间完成
+    });
+}
+
 // 加载必要资源
 if (screen.width >= 768) {
     Promise.all([
@@ -188,7 +360,6 @@ if (screen.width >= 768) {
         // 初始化看板娘配置
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
-            //apiPath: "https://live2d.fghrsh.net/api/",https://cdn.jsdelivr.net/gh/oivio-up/live2d_api/https://fastly.jsdelivr.net/gh/oivio-up/live2d_api/
             cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d_api@v1.0.8/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
         });

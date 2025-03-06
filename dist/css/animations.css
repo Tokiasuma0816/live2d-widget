@@ -308,6 +308,37 @@
     animation: input-container-appear 0.5s ease-out forwards;
 }
 
+/* 输入框模糊效果动画 */
+@keyframes blur-in {
+    from { backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
+    to { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+}
+
+/* 输入框获得焦点时的高亮模糊效果 */
+@keyframes focus-blur-pulse {
+    0% { 
+        backdrop-filter: blur(10px) brightness(1);
+        -webkit-backdrop-filter: blur(10px) brightness(1);
+    }
+    50% { 
+        backdrop-filter: blur(12px) brightness(1.02);
+        -webkit-backdrop-filter: blur(12px) brightness(1.02);
+    }
+    100% { 
+        backdrop-filter: blur(10px) brightness(1);
+        -webkit-backdrop-filter: blur(10px) brightness(1);
+    }
+}
+
+/* 添加输入容器的动画效果 */
+#input-container {
+    animation: blur-in 0.3s forwards;
+}
+
+#input-container:focus-within {
+    animation: focus-blur-pulse 2s infinite;
+}
+
 /* 打字指示器动画 */
 @keyframes typing-dots {
     0% { transform: translateY(0); }
@@ -364,4 +395,21 @@
 .message-delete-btn:hover {
     background: rgba(239, 68, 68, 0.9);
     transform: scale(1.1);
+}
+
+/* 优化粒子爆炸效果，使其更平滑 */
+.telegram-particle {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* 调整批量删除消息时的动画 */
+@keyframes batch-delete-fade {
+    0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(0.8); filter: blur(3px); }
+}
+
+.batch-deleting {
+    pointer-events: none !important;
 }

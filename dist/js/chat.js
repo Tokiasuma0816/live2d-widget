@@ -85,6 +85,9 @@ async function sendMessage() {
             }
         }
 
+        // AI 消息最终处理 - 添加删除按钮
+        finalizeAiMessage(aiMessageDiv, accumulatedText);
+
         // 如果 Notion 脚本已启用，调用同步功能
         if (window.notionEnabled) {
             syncToNotion(accumulatedText);
@@ -94,7 +97,55 @@ async function sendMessage() {
         const errorMessage = "请求失败，请检查网络或API设置。";
         showLive2DMessage(errorMessage);
         aiMessageDiv.textContent = errorMessage;
+        
+        // 即使是错误消息，也添加删除按钮
+        finalizeAiMessage(aiMessageDiv, errorMessage);
     }
+}
+
+// 新增函数：完成AI消息的显示，添加删除按钮
+function finalizeAiMessage(messageDiv, text) {
+    // 清空原有内容，重新构建消息结构
+    messageDiv.innerHTML = '';
+    
+    // 创建消息内容容器
+    const messageContent = document.createElement("div");
+    messageContent.className = "message-content";
+    
+    // 处理消息文本，支持简单的Markdown格式
+    let formattedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>');
+        
+    // 处理换行
+    formattedText = formattedText.replace(/\n/g, '<br>');
+    
+    messageContent.innerHTML = formattedText;
+    
+    // 添加时间戳
+    const timestamp = document.createElement("div");
+    timestamp.className = "message-timestamp";
+    const now = new Date();
+    timestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    messageContent.appendChild(timestamp);
+    
+    // 创建删除按钮
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "message-delete-btn";
+    deleteBtn.innerHTML = "×";
+    deleteBtn.title = "删除消息";
+    deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteMessage(messageDiv);
+    };
+    
+    // 组合元素
+    messageDiv.appendChild(messageContent);
+    messageDiv.appendChild(deleteBtn);
+    
+    // 滚动到底部
+    scrollToBottom();
 }
 
 // 添加消息到聊天框
@@ -337,24 +388,28 @@ async function clearMessages() {
         
         if (messages.length === 0) return;
         
-        // 批量删除时，直接移除所有消息，只为最后一个消息创建粒子特效
-        if (messages.length > 5) {
-            // 对于多于5条的消息，只为最后一个显示特效
-            messages.slice(0, -1).forEach(msg => {
-                msg.remove();
-            });
-            
-            // 对最后一条消息执行粒子效果
-            await deleteMessage(messages[messages.length - 1]);
-        } else {
-            // 少量消息可以逐个有序执行删除动画
-            for (let i = 0; i < messages.length; i++) {
-                await deleteMessage(messages[i]);
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+        // 修改删除逻辑：无论多少条消息，都逐个删除，但控制动画速度
+        // 计算删除间隔，消息较多时缩短间隔
+        const deleteInterval = messages.length > 10 ? 50 : 
+                              messages.length > 5 ? 80 : 120;
+        
+        // 禁用所有交互，避免删除过程中的干扰
+        document.querySelectorAll('.message').forEach(msg => {
+            msg.style.pointerEvents = 'none';
+        });
+        
+        // 逐个删除消息，保持视觉连贯性
+        for (let i = 0; i < messages.length; i++) {
+            // 使用setTimeout而不是同步等待，让动画能够并行但错开开始
+            setTimeout(() => {
+                createParticleExplosion(messages[i]);
+            }, i * deleteInterval);
         }
         
-        showLive2DMessage("对话记录已清空!", 3000);
+        // 等待所有消息删除完成后显示提示
+        setTimeout(() => {
+            showLive2DMessage("对话记录已清空!", 3000);
+        }, messages.length * deleteInterval + 500);
     }
 }
 
