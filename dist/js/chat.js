@@ -388,28 +388,32 @@ async function clearMessages() {
         
         if (messages.length === 0) return;
         
-        // 修改删除逻辑：无论多少条消息，都逐个删除，但控制动画速度
-        // 计算删除间隔，消息较多时缩短间隔
-        const deleteInterval = messages.length > 10 ? 50 : 
-                              messages.length > 5 ? 80 : 120;
-        
         // 禁用所有交互，避免删除过程中的干扰
         document.querySelectorAll('.message').forEach(msg => {
             msg.style.pointerEvents = 'none';
         });
         
+        console.log(`正在清空 ${messages.length} 条消息`);
+        
         // 逐个删除消息，保持视觉连贯性
         for (let i = 0; i < messages.length; i++) {
             // 使用setTimeout而不是同步等待，让动画能够并行但错开开始
+            const delayTime = i * (messages.length > 10 ? 50 : messages.length > 5 ? 80 : 120);
+            
             setTimeout(() => {
-                createParticleExplosion(messages[i]);
-            }, i * deleteInterval);
+                // 确保元素仍然存在于DOM中
+                if (messages[i] && messages[i].parentNode) {
+                    console.log(`删除消息 ${i+1}/${messages.length}`);
+                    createParticleExplosion(messages[i]);
+                }
+            }, delayTime);
         }
         
         // 等待所有消息删除完成后显示提示
+        const totalDelay = messages.length * (messages.length > 10 ? 50 : messages.length > 5 ? 80 : 120) + 500;
         setTimeout(() => {
             showLive2DMessage("对话记录已清空!", 3000);
-        }, messages.length * deleteInterval + 500);
+        }, totalDelay);
     }
 }
 

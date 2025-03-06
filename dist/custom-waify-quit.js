@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // 等待原始的waifu-tips.js加载完成
     let checkInterval = setInterval(() => {
         const waifuTool = document.querySelector("#waifu-tool");
-        if (waifuTool) {
+        if (waifuTool && document.querySelector("#waifu-tool .fa-times")) {
             clearInterval(checkInterval);
             setupCustomQuit();
         }
@@ -16,18 +16,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function setupCustomQuit() {
     // 找到退出按钮并替换事件
-    const quitButton = document.querySelector("#waifu-tool .fa-times");
-    if (!quitButton) return;
+    const quitButton = document.querySelector("#waifu-tool span:last-child");
+    if (!quitButton) {
+        console.warn("无法找到看板娘退出按钮");
+        return;
+    }
     
     // 移除原有的所有事件监听器
     const newQuitButton = quitButton.cloneNode(true);
     quitButton.parentNode.replaceChild(newQuitButton, quitButton);
     
+    console.log("已替换看板娘退出按钮");
+    
     // 添加新的点击事件
-    newQuitButton.addEventListener("click", function() {
+    newQuitButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
         // 获取看板娘元素
         const waifu = document.getElementById('waifu');
         if (waifu) {
+            console.log("执行看板娘粒子效果");
+            
             // 禁用其他工具按钮
             const tools = document.querySelectorAll('#waifu-tool span');
             tools.forEach(tool => {
@@ -35,7 +45,7 @@ function setupCustomQuit() {
             });
             
             // 执行粒子效果
-            createParticleExplosion(waifu, 150).then(() => {
+            createWaifuParticles(waifu, 200).then(() => {
                 // 完成后执行原始的退出逻辑
                 localStorage.setItem('waifu-display', Date.now());
                 waifu.style.bottom = '-500px';
@@ -44,14 +54,15 @@ function setupCustomQuit() {
                 }, 3000);
             });
         }
+        return false;
     });
     
-    // 添加粒子动画CSS
-    if (!document.getElementById('waifu-particle-style')) {
+    // 添加粒子动画CSS - 使用唯一的名称避免冲突
+    if (!document.getElementById('waifu-custom-particle-style')) {
         const style = document.createElement('style');
-        style.id = 'waifu-particle-style';
+        style.id = 'waifu-custom-particle-style';
         style.textContent = `
-            @keyframes waifu-particle-fly {
+            @keyframes waifu-custom-particle-fly {
                 0% {
                     transform: translate(0, 0) scale(1);
                     opacity: var(--opacity, 1);
@@ -62,7 +73,7 @@ function setupCustomQuit() {
                 }
             }
             
-            @keyframes waifu-sparkle-fly {
+            @keyframes waifu-custom-sparkle-fly {
                 0% {
                     transform: translate(0, 0) scale(1);
                     opacity: 1;
@@ -77,17 +88,38 @@ function setupCustomQuit() {
                 }
             }
             
-            .waifu-deleting {
+            .waifu-custom-deleting {
                 opacity: 0.7;
                 transition: opacity 0.5s;
+            }
+            
+            .waifu-custom-particle {
+                position: absolute;
+                border-radius: 50%;
+                opacity: 0.7;
+                box-shadow: 0 0 2px rgba(255,255,255,0.3);
+                transform-origin: center center;
+                z-index: 10000;
+                pointer-events: none;
+            }
+            
+            .waifu-custom-sparkle {
+                position: absolute;
+                border-radius: 50%;
+                background-color: white;
+                opacity: 0.9;
+                box-shadow: 0 0 3px rgba(255,255,255,0.8);
+                transform-origin: center center;
+                z-index: 10001;
+                pointer-events: none;
             }
         `;
         document.head.appendChild(style);
     }
 }
 
-// 创建粒子爆炸效果
-function createParticleExplosion(element, particleCount = 150) {
+// 创建粒子爆炸效果 - 使用唯一名称避免与消息粒子冲突
+function createWaifuParticles(element, particleCount = 150) {
     if (!element) return Promise.resolve();
     
     const rect = element.getBoundingClientRect();
@@ -98,7 +130,7 @@ function createParticleExplosion(element, particleCount = 150) {
     
     // 创建粒子容器
     const container = document.createElement('div');
-    container.className = 'particle-container';
+    container.className = 'waifu-custom-particle-container';
     container.style.cssText = `
         position: absolute;
         left: ${rect.left}px;
@@ -115,7 +147,7 @@ function createParticleExplosion(element, particleCount = 150) {
     const particles = [];
     
     // 先添加模糊和隐去效果
-    element.classList.add('waifu-deleting');
+    element.classList.add('waifu-custom-deleting');
     
     // 创建粒子
     for (let i = 0; i < particleCount; i++) {
@@ -143,7 +175,7 @@ function createParticleExplosion(element, particleCount = 150) {
         
         // 创建粒子元素
         const particle = document.createElement('div');
-        particle.className = 'waifu-particle';
+        particle.className = 'waifu-custom-particle';
         
         // 基本样式
         particle.style.cssText = `
@@ -160,7 +192,7 @@ function createParticleExplosion(element, particleCount = 150) {
             z-index: 10000;
             --tx: ${tx}px;
             --ty: ${ty}px;
-            animation: waifu-particle-fly ${duration}s ease-out ${delay}s forwards;
+            animation: waifu-custom-particle-fly ${duration}s ease-out ${delay}s forwards;
         `;
         
         container.appendChild(particle);
@@ -182,7 +214,7 @@ function createParticleExplosion(element, particleCount = 150) {
         const delay = Math.random() * 0.2;
         
         const sparkle = document.createElement('div');
-        sparkle.className = 'waifu-sparkle';
+        sparkle.className = 'waifu-custom-sparkle';
         sparkle.style.cssText = `
             position: absolute;
             left: ${x}px;
@@ -197,7 +229,7 @@ function createParticleExplosion(element, particleCount = 150) {
             z-index: 10001;
             --tx: ${tx}px;
             --ty: ${ty}px;
-            animation: waifu-sparkle-fly ${duration}s ease-out ${delay}s forwards;
+            animation: waifu-custom-sparkle-fly ${duration}s ease-out ${delay}s forwards;
         `;
         
         container.appendChild(sparkle);

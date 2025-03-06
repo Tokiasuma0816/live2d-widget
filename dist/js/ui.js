@@ -65,7 +65,10 @@ function toggleDropdownHint() {
 // Live2D 消息显示
 function showLive2DMessage(text, timeout = 8000) {
     if (typeof window.showMessage === "function") {
+        console.log("显示Live2D消息: ", text.substring(0, 30) + (text.length > 30 ? "..." : ""));
         window.showMessage(text, timeout);
+    } else {
+        console.warn("Live2D showMessage 函数不可用");
     }
 }
 

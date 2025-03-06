@@ -111,14 +111,87 @@
         quit: {
             icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">\x3c!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --\x3e<path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>',
             callback: () => {
-                localStorage.setItem("waifu-display", Date.now()),
-                o("愿你有一天能与重要的人重逢。", 2e3, 11),
-                document.getElementById("waifu").style.bottom = "-500px",
-                setTimeout(( () => {
-                    document.getElementById("waifu").style.display = "none",
-                    document.getElementById("waifu-toggle").classList.add("waifu-toggle-active")
+                // 记录退出时间
+                localStorage.setItem("waifu-display", Date.now());
+                
+                // 显示告别消息
+                o("愿你有一天能与重要的人重逢。", 2e3, 11);
+                
+                // 获取看板娘元素
+                const waifu = document.getElementById("waifu");
+                
+                // 创建并附加粒子效果样式
+                if (!document.getElementById('waifu-particles-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'waifu-particles-style';
+                    style.textContent = `
+                        @keyframes particle-fly {
+                            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+                            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+                        }
+                        .waifu-particle {
+                            position: absolute;
+                            border-radius: 50%;
+                            pointer-events: none;
+                            z-index: 10000;
+                        }
+                    `;
+                    document.head.appendChild(style);
                 }
-                ), 3e3)
+                
+                // 淡出过渡效果
+                waifu.style.transition = 'opacity 0.5s';
+                waifu.style.opacity = '0.6';
+                
+                // 创建粒子效果
+                const rect = waifu.getBoundingClientRect();
+                const container = document.createElement('div');
+                container.style.cssText = `
+                    position: fixed;
+                    left: ${rect.left}px;
+                    top: ${rect.top}px;
+                    width: ${rect.width}px; 
+                    height: ${rect.height}px;
+                    pointer-events: none;
+                    z-index: 10000;
+                `;
+                document.body.appendChild(container);
+                
+                // 创建100个粒子
+                for (let i = 0; i < 100; i++) {
+                    const size = 2 + Math.random() * 3;
+                    const x = Math.random() * rect.width;
+                    const y = Math.random() * rect.height;
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 50 + Math.random() * 300;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    const duration = 0.5 + Math.random() * 0.8;
+                    const delay = Math.random() * 0.3;
+                    const color = Math.random() > 0.5 ? '#7BC6FF' : '#64B5F6';
+                    
+                    const particle = document.createElement('div');
+                    particle.className = 'waifu-particle';
+                    particle.style.cssText = `
+                        left: ${x}px;
+                        top: ${y}px;
+                        width: ${size}px;
+                        height: ${size}px;
+                        background-color: ${color};
+                        opacity: 0.8;
+                        --tx: ${tx}px;
+                        --ty: ${ty}px;
+                        animation: particle-fly ${duration}s ease-out ${delay}s forwards;
+                    `;
+                    container.appendChild(particle);
+                }
+                
+                // 在粒子动画结束后隐藏元素，不使用下滑动画
+                setTimeout(() => {
+                    waifu.style.display = 'none';
+                    container.remove();
+                    document.getElementById("waifu-toggle").classList.add("waifu-toggle-active");
+                }, 1000);
             }
         }
     };
