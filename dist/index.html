@@ -4,327 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini AI Chat</title>
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.2/dist/autoload.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            padding-top: 4rem;
-        }
-        #chat-container {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-        #messages {
-            height: 300px;
-            overflow-y: auto;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 15px;
-            background: #fafafa;
-        }
-        .message {
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin: 8px 0;
-            max-width: 80%;
-            line-height: 1.5;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        .user-message {
-            background: #9683EC;
-            color: white;
-            align-self: flex-end;
-            margin-left: 20%;
-        }
-        .ai-message {
-            background: transparent;  /* 初始时透明背景 */
-            color: white;
-            align-self: flex-start;
-            margin-right: 20%;
-            position: relative;
-            border-radius: 12px;
-            transition: background-color 0.3s;  /* 添加过渡效果 */
-        }
-        .ai-message:not(:empty) {
-            background: #64B5F6;
-            border-radius: 12px 12px 12px 0;
-        }
-        .ai-message:not(:empty)::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -8px;
-            width: 16px;
-            height: 16px;
-            background: #64B5F6;
-            clip-path: polygon(0 0, 100% 100%, 100% 0);
-        }
-        #input-container {
-            display: flex;
-            gap: 10px;
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-        }
-        input {
-            flex-grow: 1;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        input:focus {
-            outline: none;
-            border-color: #9683EC;
-            box-shadow: 0 0 0 2px rgba(150, 131, 236, 0.1);
-        }
-        button {
-            background: #9683EC;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        button:hover {
-            background: #7B68EE;
-            transform: translateY(-1px);
-        }
-        #config-container {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            resize: none;
-        }
-        .nav-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem 1rem;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .nav-brand {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #374151;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .nav-items {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .nav-button {
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            background-color: #f3f4f6;
-            color: #374151;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .nav-button:hover {
-            background-color: #e5e7eb;
-        }
-        
-        .nav-button.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        #chat-container, #config-container {
-            /* 添加过渡效果 */
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease-in-out;
-        }
-
-        #chat-container.active, #config-container.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 设置面板相关样式 */
-        .settings-section {
-            background: #ffffff;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-        }
-
-        .settings-header {
-            padding: 12px 15px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8fafc;
-            border-bottom: 1px solid #e5e7eb;
-            transition: all 0.2s;
-        }
-
-        .settings-header:hover {
-            background: #f1f5f9;
-        }
-
-        .settings-header h4 {
-            margin: 0;
-            color: #334155;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .settings-header h4 svg {
-            width: 16px;  /* 减小图标大小 */
-            height: 16px;
-            color: #64748b;  /* 更柔和的图标颜色 */
-        }
-
-        .settings-header .arrow {
-            width: 16px;  /* 减小箭头图标大小 */
-            height: 16px;
-            color: #94a3b8;
-            transform: rotate(-90deg);
-            transition: transform 0.3s;
-        }
-
-        .settings-content {
-            max-height: 0;
-            padding: 0 15px;
-            overflow: hidden;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .settings-content.active {
-            max-height: 500px;
-            padding: 15px;
-        }
-
-        .settings-header .arrow.active {
-            transform: rotate(0);
-        }
-
-        .settings-field {
-            margin-bottom: 12px;
-        }
-
-        .settings-field label {
-            display: block;
-            margin-bottom: 5px;
-            color: #475569;
-            font-size: 0.9em;
-        }
-
-        .settings-field input,
-        .settings-field textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            background: white;
-            color: #334155;
-        }
-
-        .settings-field input:focus,
-        .settings-field textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-
-        .settings-footer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .settings-footer button {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .settings-footer .save-btn {
-            background: #3b82f6;
-        }
-
-        .settings-footer .save-btn:hover {
-            background: #2563eb;
-        }
-
-        .settings-footer .cancel-btn {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        .settings-footer .cancel-btn:hover {
-            background: #cbd5e1;
-        }
-
-        /* 添加下拉提示样式 */
-        .dropdown-hint {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            pointer-events: none;
-            z-index: 1001;
-        }
-
-        .dropdown-hint.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
+    <!-- 加载样式表 -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <!-- 加载Live2D -->
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.5.3/dist/autoload.js"></script>
+    <!-- 加载JS模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/notion.js"></script>
+    <script src="js/notion-debug.js"></script>
+    <script src="js/chat.js"></script>
 </head>
 <body>
-
+    <!-- 导航栏 -->
     <div class="nav-container">
         <div class="nav-brand" onclick="toggleDropdownHint()">
             Gemini AI Assistant
@@ -338,319 +32,157 @@
         </div>
     </div>
 
+    <!-- 聊天容器部分 -->
     <div id="chat-container">
+        <div class="chat-header">
+            <span>与 Gemini AI 的对话</span>
+            <button class="clear-btn" onclick="clearMessages()" title="清空对话历史">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
         <div id="messages"></div>
         <div id="input-container">
             <input type="text" id="user-input" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">发送</button>
+            <button class="send-btn" onclick="sendMessage()" title="发送">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                </svg>
+            </button>
         </div>
     </div>
 
+    <!-- 设置容器部分 -->
     <div id="config-container">
-        <h3>设置面板</h3>
-        
-        <div class="settings-section">
-            <div class="settings-header" onclick="toggleSection('gemini')">
-                <h4>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        <div class="settings-container">
+            <h3>设置面板</h3>
+            
+            <!-- Gemini AI 设置 -->
+            <div class="settings-section">
+                <div class="settings-header" onclick="toggleSection('gemini')">
+                    <h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Gemini AI 设置
+                    </h4>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
                     </svg>
-                    Gemini AI 设置
-                </h4>
-                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path d="M7 10l5 5 5-5z"/>
-                </svg>
-            </div>
-            <div class="settings-content" id="gemini-section">
-                <div class="settings-field">
-                    <label for="api-key">API Key</label>
-                    <input type="text" id="api-key" placeholder="输入你的 Gemini API Key">
                 </div>
-                <div class="settings-field">
-                    <label for="proxy-url">代理地址</label>
-                    <input type="text" id="proxy-url" placeholder="输入 API 代理地址">
-                </div>
-                <div class="settings-field">
-                    <label for="custom-prompt">自定义 Prompt</label>
-                    <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+                <div class="settings-content" id="gemini-section">
+                    <div class="settings-field">
+                        <label for="api-key">API Key</label>
+                        <input type="text" id="api-key" placeholder="输入你的 Gemini API Key">
+                    </div>
+                    <div class="settings-field">
+                        <label for="proxy-url">代理地址</label>
+                        <input type="text" id="proxy-url" placeholder="输入 API 代理地址">
+                    </div>
+                    <div class="settings-field">
+                        <label for="custom-prompt">自定义 Prompt</label>
+                        <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="settings-section">
-            <div class="settings-header" onclick="toggleSection('other')">
-                <h4>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <!-- Notion 设置 -->
+            <div class="settings-section">
+                <div class="settings-header" onclick="toggleSection('notion')">
+                    <h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
+                        </svg>
+                        Notion 脚本设置
+                    </h4>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
                     </svg>
-                    其他设置
-                </h4>
-                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path d="M7 10l5 5 5-5z"/>
-                </svg>
+                </div>
+                <div class="settings-content" id="notion-section">
+                    <div class="settings-field">
+                        <label for="notion-token">Notion Token</label>
+                        <input type="text" id="notion-token" placeholder="输入你的 Notion API Token">
+                    </div>
+                    <div class="settings-field">
+                        <label for="notion-page-id">页面 ID</label>
+                        <input type="text" id="notion-page-id" placeholder="输入 Notion 页面 ID">
+                    </div>
+                    
+                    <!-- 添加调试按钮和结果区域 -->
+                    <div class="settings-field">
+                        <button class="test-btn" id="test-notion-btn" onclick="testNotionConfig()">测试 Notion 配置</button>
+                        <div id="notion-test-result" style="display:none; margin-top:10px; padding:10px; border-radius:5px;"></div>
+                    </div>
+                    
+                    <div class="settings-field">
+                        <label>脚本状态</label>
+                        <div class="script-status" style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                            <span id="notion-status" style="color: #64748b;">未运行</span>
+                            <button class="script-btn" onclick="toggleNotionScript()" style="background: #10b981;">
+                                启动脚本
+                            </button>
+                        </div>
+                    </div>
+                    <p style="color: #64748b; font-style: italic; margin-top: 12px;">
+                        使用 Python 服务处理内容并同步到 Notion，支持 LaTeX 数学公式格式化。
+                    </p>
+                </div>
             </div>
-            <div class="settings-content" id="other-section">
-                <p style="color: #64748b; font-style: italic;">更多设置选项即将推出...</p>
-            </div>
-        </div>
 
-        <div class="settings-footer">
-            <button class="cancel-btn" onclick="toggleConfig()">取消</button>
-            <button class="save-btn" onclick="saveConfig()">保存</button>
+            <!-- 其他设置 -->
+            <div class="settings-section">
+                <div class="settings-header" onclick="toggleSection('other')">
+                    <h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        其他设置
+                    </h4>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </div>
+                <div class="settings-content" id="other-section">
+                    <p style="color: #64748b; font-style: italic;">更多设置选项即将推出...</p>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <button class="cancel-btn" onclick="toggleConfig()">取消</button>
+                <button class="save-btn" onclick="saveConfig()">保存</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        let currentPanel = null;
-
-        function toggleChat() {
-            const chatContainer = document.getElementById("chat-container");
-            const configContainer = document.getElementById("config-container");
+    <!-- 初始化脚本，确保DOM加载后执行 -->
+    <!-- 修改初始化脚本部分 -->
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        // 初始化Live2D位置和事件
+        const waifu = document.querySelector("#waifu");
+        if (waifu) {
+            waifu.style.bottom = "0";
+            waifu.style.right = "30px";
             
-            if (currentPanel === "chat") {
-                chatContainer.style.display = "none";
-                chatContainer.classList.remove("active");
-                currentPanel = null;
-            } else {
-                chatContainer.style.display = "flex";
-                configContainer.style.display = "none";
-                configContainer.classList.remove("active");
-                setTimeout(() => chatContainer.classList.add("active"), 10);
-                currentPanel = "chat";
-            }
-        }
-
-        function toggleConfig() {
-            const chatContainer = document.getElementById("chat-container");
-            const configContainer = document.getElementById("config-container");
-            
-            if (currentPanel === "config") {
-                configContainer.style.display = "none";
-                configContainer.classList.remove("active");
-                currentPanel = null;
-            } else {
-                configContainer.style.display = "flex";
-                chatContainer.style.display = "none";
-                chatContainer.classList.remove("active");
-                setTimeout(() => configContainer.classList.add("active"), 10);
-                currentPanel = "config";
-            }
-        }
-
-        function getConfig() {
-            return {
-                apiKey: localStorage.getItem("gemini_api_key"),
-                proxyUrl: localStorage.getItem("proxy_url"),
-                customPrompt: localStorage.getItem("custom_prompt") || ""
-            };
-        }
-
-        async function sendMessage() {
-            const userInput = document.getElementById("user-input").value.trim();
-            if (!userInput) return;
-
-            const { apiKey, proxyUrl, customPrompt } = getConfig();
-            if (!apiKey || !proxyUrl) {
-                alert("请先设置 API Key 和代理地址！");
-                return;
-            }
-
-            document.getElementById("user-input").value = "";
-            addMessage("user", userInput);
-            
-            // 创建消息元素但不立即应用完整样式
-            const aiMessageDiv = document.createElement("div");
-            aiMessageDiv.classList.add("message", "ai-message");
-            // 不设置初始内容，让它保持空
-            document.getElementById("messages").appendChild(aiMessageDiv);
-            
-            showLive2DMessage("嗯~ o(*￣▽￣*)o...");
-            
-            try {
-                // 构建messages数组,加入prompt
-                let messages = [];
-                if(customPrompt) {
-                    messages.push({
-                        role: "system",
-                        content: customPrompt
-                    });
-                }
-                messages.push({
-                    role: "user", 
-                    content: userInput
-                });
-
-                const response = await fetch(proxyUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Accept": "text/event-stream"
-                    },
-                    body: JSON.stringify({
-                        model: "gemini-1.5-flash",
-                        messages: messages,  // 使用包含prompt的messages
-                        stream: true,
-                        max_tokens: 1000,
-                        temperature: 0.7
-                    })
-                });
-
-                if (!response.ok) throw new Error(`HTTP 错误! 状态码: ${response.status}`);
-
-                const reader = response.body.getReader();
-                let accumulatedText = "";
-
-                // 读取流式响应
-                while (true) {
-                    const {done, value} = await reader.read();
-                    if (done) break;
-                    
-                    // 解析新的文本片段
-                    const text = new TextDecoder().decode(value);
-                    const lines = text.split('\n');
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                // 处理特殊的[DONE]标记
-                                const content = line.slice(5).trim();
-                                if (content === '[DONE]') continue;
-                                
-                                // 解析JSON响应
-                                const data = JSON.parse(content);
-                                const newText = data.choices?.[0]?.delta?.content || '';
-                                if (newText) {
-                                    accumulatedText += newText;
-                                    // 更新AI消息内容
-                                    aiMessageDiv.textContent = accumulatedText;
-                                    // 更新Live2D显示
-                                    showLive2DMessage(accumulatedText);
-                                    // 滚动到底部
-                                    document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
-                                }
-                            } catch (e) {
-                                console.debug("解析行出错,可能是[DONE]标记:", line);
-                                continue;
-                            }
-                        }
-                    }
-                }
-
-            } catch (error) {
-                console.error("请求失败：", error);
-                const errorMessage = "请求失败，请检查网络或API设置。";
-                showLive2DMessage(errorMessage);
-                aiMessageDiv.textContent = errorMessage;
-            }
-        }
-
-        function addMessage(role, text) {
-            const messages = document.getElementById("messages");
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message", role === "user" ? "user-message" : "ai-message");
-            messageDiv.textContent = text;
-            messages.appendChild(messageDiv);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function showLive2DMessage(text) {
-            if (typeof window.showMessage === "function") {
-                // 增加显示时间到8秒,让用户有足够时间阅读
-                window.showMessage(text, 8000);
-            }
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
-        }
-
-        function saveConfig() {
-            const apiKey = document.getElementById("api-key").value;
-            const proxyUrl = document.getElementById("proxy-url").value;
-            const customPrompt = document.getElementById("custom-prompt").value;
-            
-            // 保存到 localStorage
-            localStorage.setItem("gemini_api_key", apiKey);
-            localStorage.setItem("proxy_url", proxyUrl);
-            localStorage.setItem("custom_prompt", customPrompt);
-            
-            // 隐藏设置面板
-            const configContainer = document.getElementById("config-container");
-            configContainer.style.display = "none";
-            configContainer.classList.remove("active");
-            currentPanel = null;
-            
-            // 显示保存成功提示
-            showLive2DMessage("设置已保存！", 3000);
-        }
-
-        function loadConfig() {
-            // 从 localStorage 加载配置
-            const apiKey = localStorage.getItem("gemini_api_key") || "";
-            const proxyUrl = localStorage.getItem("proxy_url") || "";
-            const customPrompt = localStorage.getItem("custom_prompt") || "";
-            
-            // 填充到表单
-            document.getElementById("api-key").value = apiKey;
-            document.getElementById("proxy-url").value = proxyUrl;
-            document.getElementById("custom-prompt").value = customPrompt;
-        }
-
-        function toggleSection(sectionId) {
-            const section = document.getElementById(`${sectionId}-section`);
-            const arrow = section.previousElementSibling.querySelector('.arrow');
-            
-            // 切换当前区域的展开/折叠状态
-            section.classList.toggle('active');
-            arrow.classList.toggle('active');
-        }
-
-        // 修改下拉提示控制函数
-        let dropdownTimer = null;
-
-        function toggleDropdownHint() {
-            const hint = document.querySelector('.dropdown-hint');
-            
-            // 如果提示正在显示且定时器存在，则立即关闭
-            if (hint.classList.contains('active') && dropdownTimer) {
-                clearTimeout(dropdownTimer);
-                hint.classList.remove('active');
-                dropdownTimer = null;
-                return;
-            }
-            
-            // 显示提示
-            hint.classList.add('active');
-            
-            // 设置自动隐藏定时器
-            dropdownTimer = setTimeout(() => {
-                hint.classList.remove('active');
-                dropdownTimer = null;
-            }, 2500);
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            // 设置初始位置
-            const waifu = document.querySelector("#waifu");
-            if (waifu) {
-                waifu.style.bottom = "0";
-                waifu.style.right = "30px";  // 设置右侧间距
-            }
-            
-            // 其他事件监听
-            waifu?.addEventListener("click", () => {
+            waifu.addEventListener("click", () => {
                 document.getElementById("user-input").focus();
             });
-            
-            // 加载配置
+        }
+        
+        // 加载配置
+        if (typeof loadConfig === "function") {
             loadConfig();
-        });
-
-        window.onload = loadConfig;
-    </script>
-
+        }
+        
+        // 检查Python服务可用性
+        if (typeof checkServerStatus === "function") {
+            await checkServerStatus();
+        }
+    });
+</script>
 </body>
 </html>

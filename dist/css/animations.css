@@ -1,0 +1,367 @@
+/* 容器过渡效果 */
+#chat-container, #config-container {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease-in-out;
+}
+
+#chat-container.active, #config-container.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 下拉提示动画 */
+.dropdown-hint {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.dropdown-hint.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 按钮加载动画 */
+.script-btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.script-btn.loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: button-loading-spinner 0.75s linear infinite;
+}
+
+@keyframes button-loading-spinner {
+    from { transform: rotate(0turn); }
+    to { transform: rotate(1turn); }
+}
+
+/* 清除消息动画 */
+@keyframes message-fade-out {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.message-fade-out {
+    animation: message-fade-out 0.3s forwards;
+}
+
+/* 粒子消散动画效果 */
+@keyframes particle-fade {
+    0% { 
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+    }
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background-color: var(--particle-color, #9683EC);
+    animation: particle-fade 0.6s ease-out forwards;
+}
+
+/* Telegram风格粒子效果 */
+.telegram-particle {
+    position: absolute;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+}
+
+/* 消息消失的容器淡出效果 */
+@keyframes container-fade-out {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+.message.deleting {
+    animation: container-fade-out 0.5s ease-out forwards;
+    position: relative;
+    overflow: visible !important;
+    pointer-events: none;
+}
+
+/* 消息删除过程中的动画 */
+.message.deleting > *:not(.particle-container):not(.telegram-particle) {
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+}
+
+/* 消息删除过程中的动画 - 添加模糊和透明效果 */
+.message.deleting > *:not(.particle-container):not(.telegram-particle) {
+    opacity: 0;
+    filter: blur(3px);
+    transform: scale(0.98);
+    transition: opacity 0.3s ease-out, filter 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* 自定义确认对话框样式 */
+.confirm-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1002;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+}
+
+.confirm-dialog p {
+    margin: 0 0 20px 0;
+    color: #334155;
+}
+
+.confirm-dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirm-dialog button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.confirm-dialog-cancel {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.confirm-dialog-confirm {
+    background: #ef4444;
+    color: white;
+}
+
+/* 细化粒子动画 */
+@keyframes particle-float {
+    0% { 
+        opacity: 1;
+        transform: translate(0, 0) rotate(0) scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--rotation, 0)) scale(0);
+    }
+}
+
+/* Telegram风格粒子动画 */
+@keyframes particle-fly {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: var(--opacity, 1);
+    }
+    40% {
+        opacity: var(--opacity, 0.8);
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 闪光粒子的动画 */
+@keyframes sparkle-fly {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    30% {
+        opacity: 0.8;
+        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(1.2);
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 消息删除样式 */
+.message.deleting {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    opacity: 0;
+    transform: scale(0.95);
+    position: relative;
+    overflow: visible !important;
+    pointer-events: none;
+}
+
+/* 消息视觉克隆样式 */
+.message-visual-clone {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9998;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.message-visual-clone.deleting {
+    opacity: 0;
+    filter: blur(3px);
+    transform: scale(0.95);
+}
+
+/* 粒子容器样式 */
+.particle-container {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 粒子样式 */
+.telegram-particle {
+    position: absolute;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+.telegram-sparkle {
+    position: absolute;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    filter: brightness(1.5);
+}
+
+/* 消息类型动画 */
+@keyframes user-message-appear {
+    from { opacity: 0; transform: translateY(20px) translateX(20px); }
+    to { opacity: 1; transform: translateY(0) translateX(0); }
+}
+
+@keyframes ai-message-appear {
+    from { opacity: 0; transform: translateY(20px) translateX(-20px); }
+    to { opacity: 1; transform: translateY(0) translateX(0); }
+}
+
+.user-message {
+    animation: user-message-appear 0.3s ease forwards;
+}
+
+.ai-message {
+    animation: ai-message-appear 0.3s ease forwards;
+}
+
+/* 输入框焦点效果 */
+@keyframes input-focus-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(150, 131, 236, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0); }
+}
+
+#user-input:focus {
+    animation: input-focus-pulse 1.5s ease-out infinite;
+}
+
+/* 输入框动画 */
+@keyframes input-container-appear {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#input-container {
+    animation: input-container-appear 0.5s ease-out forwards;
+}
+
+/* 打字指示器动画 */
+@keyframes typing-dots {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.7);
+    margin: 0 2px;
+}
+
+.typing-indicator span:nth-child(1) {
+    animation: typing-dots 0.8s infinite 0s;
+}
+.typing-indicator span:nth-child(2) {
+    animation: typing-dots 0.8s infinite 0.2s;
+}
+.typing-indicator span:nth-child(3) {
+    animation: typing-dots 0.8s infinite 0.4s;
+}
+
+/* 删除按钮样式改进 - 同时适用于用户和AI消息 */
+.message .message-delete-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0;
+    transition: all 0.2s;
+    transform: scale(0.8);
+    cursor: pointer;
+    z-index: 5;
+}
+
+.message:hover .message-delete-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.message-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.9);
+    transform: scale(1.1);
+}

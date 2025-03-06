@@ -1,0 +1,259 @@
+/* 设置容器 */
+#config-container {
+    /* 移除冲突的容器定义，使用main.css中的定义 */
+    display: none;
+}
+
+/* 设置面板样式 */
+.settings-section {
+    background: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.settings-header {
+    padding: 12px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.settings-header:hover {
+    background: #f1f5f9;
+}
+
+.settings-header h4 {
+    margin: 0;
+    color: #334155;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.settings-header h4 svg {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+}
+
+.settings-header .arrow {
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+    transform: rotate(-90deg);
+    transition: transform 0.3s;
+}
+
+.settings-content {
+    max-height: 0;
+    padding: 0 15px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.settings-content.active {
+    max-height: 500px;
+    padding: 15px;
+}
+
+.settings-header .arrow.active {
+    transform: rotate(0);
+}
+
+/* 设置字段样式 */
+.settings-field {
+    margin-bottom: 12px;
+}
+
+.settings-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #475569;
+    font-size: 0.9em;
+}
+
+.settings-field input,
+.settings-field textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: #334155;
+}
+
+.settings-field input:focus,
+.settings-field textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* 设置底部按钮 */
+.settings-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.settings-footer button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.settings-footer .save-btn {
+    background: #3b82f6;
+}
+
+.settings-footer .save-btn:hover {
+    background: #2563eb;
+}
+
+.settings-footer .cancel-btn {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.settings-footer .cancel-btn:hover {
+    background: #cbd5e1;
+}
+
+/* 脚本状态样式 */
+.script-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+#notion-status {
+    font-size: 0.9em;
+    transition: color 0.3s;
+}
+
+/* 单选按钮样式 */
+.toggle-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.toggle-container label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: normal;
+    color: #4b5563;
+}
+
+.toggle-container input[type="radio"] {
+    width: auto;
+    margin: 0;
+}
+
+.notion-sync-info {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: #f8fafc;
+    font-size: 0.85em;
+}
+
+.notion-sync-info span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Notion 测试相关样式 */
+.test-btn {
+    background: #6366f1;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.test-btn:hover {
+    background: #4f46e5;
+}
+
+.notion-test-result {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.notion-test-result.testing {
+    background-color: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+.notion-test-result.error {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.notion-test-result.success {
+    background-color: #f0fdf4;
+    color: #10b981;
+    border: 1px solid #d1fae5;
+}
+/* 添加到文件末尾 */
+
+/* 服务通知样式 */
+.service-notice {
+    display: flex;
+    padding: 12px;
+    background-color: #fff4e5;
+    border-left: 4px solid #f59e0b;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+.notice-icon {
+    font-size: 20px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.notice-content {
+    flex-grow: 1;
+}
+
+.notice-content strong {
+    display: block;
+    color: #b45309;
+    margin-bottom: 4px;
+}
+
+.notice-content p {
+    color: #78350f;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* 按钮禁用状态 */
+button:disabled {
+    cursor: not-allowed;
+}
