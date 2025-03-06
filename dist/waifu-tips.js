@@ -4,7 +4,9 @@
         return Array.isArray(e) ? e[Math.floor(Math.random() * e.length)] : e
     }
     let t;
-    function o(o, s, n) {
+    
+    // 修改为全局可访问的函数，不再是内部函数
+    window.showLive2dTips = function(o, s, n) {
         if (!o || sessionStorage.getItem("waifu-text") && sessionStorage.getItem("waifu-text") > n)
             return;
         t && (clearTimeout(t),
@@ -12,6 +14,7 @@
         o = e(o),
         sessionStorage.setItem("waifu-text", n);
         const i = document.getElementById("waifu-tips");
+        if (!i) return;
         i.innerHTML = o,
         i.classList.add("waifu-tips-active"),
         t = setTimeout(( () => {
@@ -19,7 +22,13 @@
             i.classList.remove("waifu-tips-active")
         }
         ), s)
-    }
+    };
+    
+    // 定义全局showMessage，使用showLive2dTips
+    window.showMessage = function(text, timeout) {
+        window.showLive2dTips(text, timeout || 4000, 9);
+    };
+    
     class s {
         constructor(e) {
             let {apiPath: t, cdnPath: o} = e
@@ -43,7 +52,7 @@
         async loadModel(t, s, n) {
             if (localStorage.setItem("modelId", t),
             localStorage.setItem("modelTexturesId", s),
-            o(n, 4e3, 10),
+            window.showLive2dTips(n, 4e3, 10),
             this.useCDN) {
                 this.modelList || await this.loadModelList();
                 const o = e(this.modelList.models[t]);
@@ -59,10 +68,10 @@
                 this.modelList || await this.loadModelList();
                 const s = e(this.modelList.models[t]);
                 loadlive2d("live2d", `${this.cdnPath}model/${s}/index.json`),
-                o("我的新衣服好看嘛？", 4e3, 10)
+                window.showLive2dTips("我的新衣服好看嘛？", 4e3, 10)
             } else
                 fetch(`${this.apiPath}rand_textures/?id=${t}-${s}`).then((e => e.json())).then((e => {
-                    1 !== e.textures.id || 1 !== s && 0 !== s ? this.loadModel(t, e.textures.id, "我的新衣服好看嘛？") : o("我还没有其他衣服呢！", 4e3, 10)
+                    1 !== e.textures.id || 1 !== s && 0 !== s ? this.loadModel(t, e.textures.id, "我的新衣服好看嘛？") : window.showLive2dTips("我还没有其他衣服呢！", 4e3, 10)
                 }
                 ))
         }
@@ -115,7 +124,7 @@
                 localStorage.setItem("waifu-display", Date.now());
                 
                 // 显示告别消息
-                o("愿你有一天能与重要的人重逢。", 2e3, 11);
+                window.showLive2dTips("愿你有一天能与重要的人重逢。", 2e3, 11);
                 
                 // 获取看板娘元素
                 const waifu = document.getElementById("waifu");
@@ -210,12 +219,14 @@
                 n ? (n = !1,
                 clearInterval(s),
                 s = null) : s || (s = setInterval(( () => {
-                    o(i, 6e3, 9)
+                    window.showLive2dTips(i, 6e3, 9)
                 }
                 ), 2e4))
             }
             ), 1e3),
-            o(function(e) {
+            
+            // 替换原来的o调用为window.showLive2dTips
+            window.showLive2dTips(function(e) {
                 if ("/" === location.pathname)
                     for (let {hour: t, text: o} of e) {
                         const e = new Date
@@ -241,20 +252,24 @@
             }(t.time), 7e3, 11),
             window.addEventListener("mouseover", (s => {
                 for (let {selector: n, text: i} of t.mouseover)
-                    if (s.target.matches(n))
-                        return i = e(i),
-                        i = i.replace("{text}", s.target.innerText),
-                        void o(i, 4e3, 8)
-            }
-            )),
+                    if (s.target.matches(n)) {
+                        let o = e(i);
+                        o = o.replace("{text}", s.target.innerText);
+                        window.showLive2dTips(o, 4e3, 8);
+                        return;
+                    }
+            })),
+            
             window.addEventListener("click", (s => {
                 for (let {selector: n, text: i} of t.click)
-                    if (s.target.matches(n))
-                        return i = e(i),
-                        i = i.replace("{text}", s.target.innerText),
-                        void o(i, 4e3, 8)
-            }
-            )),
+                    if (s.target.matches(n)) {
+                        let o = e(i);
+                        o = o.replace("{text}", s.target.innerText);
+                        window.showLive2dTips(o, 4e3, 8);
+                        return;
+                    }
+            })),
+            
             t.seasons.forEach(( ({date: t, text: o}) => {
                 const s = new Date
                   , n = t.split("-")[0]
@@ -267,15 +282,15 @@
             ;
             console.log("%c", c),
             c.toString = () => {
-                o(t.message.console, 6e3, 9)
+                window.showLive2dTips(t.message.console, 6e3, 9)
             }
             ,
             window.addEventListener("copy", ( () => {
-                o(t.message.copy, 6e3, 9)
+                window.showLive2dTips(t.message.copy, 6e3, 9)
             }
             )),
             window.addEventListener("visibilitychange", ( () => {
-                document.hidden || o(t.message.visibilitychange, 6e3, 9)
+                document.hidden || window.showLive2dTips(t.message.visibilitychange, 6e3, 9)
             }
             ))
         }
@@ -315,36 +330,36 @@
         });
         
         document.body.insertAdjacentHTML("beforeend", '<div id="waifu-toggle">\n            <span>看板娘</span>\n        </div>');
-        const o = document.getElementById("waifu-toggle");
+        const toggleBtn = document.getElementById("waifu-toggle");
         
-        o.addEventListener("click", () => {
-            o.classList.remove("waifu-toggle-active");
-            if (o.getAttribute("first-time")) {
+        toggleBtn.addEventListener("click", () => {
+            toggleBtn.classList.remove("waifu-toggle-active");
+            if (toggleBtn.getAttribute("first-time")) {
                 i(e);
-                o.removeAttribute("first-time");
+                toggleBtn.removeAttribute("first-time");
             } else {
                 localStorage.removeItem("waifu-display");
-                document.getElementById("waifu").style.display = "";
-                document.getElementById("waifu").classList.remove('waifu-fading');
-                setTimeout(() => {
-                    document.getElementById("waifu").style.bottom = 0;
-                }, 0);
+                const waifu = document.getElementById("waifu");
+                if (waifu) {
+                    waifu.style.display = "";
+                    waifu.classList.remove('waifu-fading');
+                    setTimeout(() => {
+                        waifu.style.bottom = 0;
+                    }, 0);
+                }
             }
         });
         
         if (localStorage.getItem("waifu-display") && Date.now() - localStorage.getItem("waifu-display") <= 864e5) {
-            o.setAttribute("first-time", true);
+            toggleBtn.setAttribute("first-time", true);
             setTimeout(() => {
-                o.classList.add("waifu-toggle-active");
+                toggleBtn.classList.add("waifu-toggle-active");
             }, 0);
         } else {
             i(e);
         }
         
-        // 导出全局的显示消息函数
-        window.showMessage = function(text, timeout) {
-            o(text, timeout || 4000, 9);
-        };
+        // showMessage已经在闭包外定义了，不需要再次定义
     };
     
     // 简化粒子爆炸效果函数

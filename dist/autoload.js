@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.2/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.3/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -300,7 +300,7 @@ function createParticleExplosion(element, particleCount = 150) {
                 opacity: 0;
                 transform: scale(0.95);
                 position: relative;
-                overflow: visible !important;
+                overflow: visible !重要;
                 pointer-events: none;
             }
         `;
@@ -313,6 +313,22 @@ function createParticleExplosion(element, particleCount = 150) {
             container.remove(); // 移除粒子容器
             resolve();
         }, 1500); // 给动画足够的时间完成
+    });
+}
+
+// 安全地添加点击监听器
+function safelyAddClickListener(waifu) {
+    if (!waifu) return;
+    
+    // 使用事件委托处理点击事件，避免直接操作canvas
+    waifu.addEventListener("click", (e) => {
+        try {
+            // 避免直接点击canvas时出错，改为通用逻辑
+            const userInput = document.getElementById("user-input");
+            if (userInput) userInput.focus();
+        } catch (err) {
+            console.log("Handled click event error:", err);
+        }
     });
 }
 

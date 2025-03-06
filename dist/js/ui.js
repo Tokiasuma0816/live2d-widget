@@ -62,11 +62,13 @@ function toggleDropdownHint() {
     }, 2500);
 }
 
-// Live2D 消息显示 - 简化版
+// Live2D 消息显示 - 修复后的版本
 function showLive2DMessage(text, timeout = 8000) {
     if (typeof window.showMessage === "function") {
+        // 确保传入正确的参数
         window.showMessage(text, timeout);
     } else {
+        // 备用方案
         try {
             const tips = document.getElementById("waifu-tips");
             if (tips) {
