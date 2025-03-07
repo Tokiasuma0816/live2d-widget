@@ -3,12 +3,6 @@ async function sendMessage() {
     const userInput = document.getElementById("user-input").value.trim();
     if (!userInput) return;
 
-    const { apiKey, proxyUrl, customPrompt } = getConfig();
-    if (!apiKey || !proxyUrl) {
-        alert("请先设置 API Key 和代理地址！");
-        return;
-    }
-
     document.getElementById("user-input").value = "";
     addMessage("user", userInput);
     
@@ -20,83 +14,39 @@ async function sendMessage() {
     showLive2DMessage("嗯~ o(*￣▽￣*)o...");
     
     try {
-        // 构建messages数组
-        let messages = [];
-        if(customPrompt) {
-            messages.push({
-                role: "system",
-                content: customPrompt
+        // 使用模型API发送消息
+        if (window.AI && window.AI.sendStreamMessage) {
+            // 使用流式API (如果可用)
+            const result = await window.AI.sendStreamMessage(userInput, (chunk, accumulated) => {
+                aiMessageDiv.textContent = accumulated;
+                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
             });
-        }
-        messages.push({
-            role: "user", 
-            content: userInput
-        });
-
-        // 发送请求
-        const response = await fetch(proxyUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-                "Accept": "text/event-stream"
-            },
-            body: JSON.stringify({
-                model: "gemini-1.5-flash",
-                messages: messages,
-                stream: true,
-                max_tokens: 3000,
-                temperature: 0.7
-            })
-        });
-
-        if (!response.ok) throw new Error(`HTTP 错误! 状态码: ${response.status}`);
-
-        // 处理流式响应
-        const reader = response.body.getReader();
-        let accumulatedText = "";
-
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) break;
             
-            const text = new TextDecoder().decode(value);
-            const lines = text.split('\n');
-            
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    try {
-                        const content = line.slice(5).trim();
-                        if (content === '[DONE]') continue;
-                        
-                        const data = JSON.parse(content);
-                        const newText = data.choices?.[0]?.delta?.content || '';
-                        if (newText) {
-                            accumulatedText += newText;
-                            aiMessageDiv.textContent = accumulatedText;
-                            showLive2DMessage(accumulatedText);
-                            document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
-                        }
-                    } catch (e) {
-                        console.debug("解析行出错,可能是[DONE]标记:", line);
-                        continue;
-                    }
-                }
+            if (!result.success) {
+                throw new Error(result.message);
             }
+            
+            // 完成处理AI消息
+            finalizeAiMessage(aiMessageDiv, result.message);
+        } else {
+            // 回退到普通API
+            const result = await window.AI.sendMessage(userInput);
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+            
+            // 完成处理AI消息
+            finalizeAiMessage(aiMessageDiv, result.message);
         }
-
-        // AI 消息最终处理 - 添加删除按钮
-        finalizeAiMessage(aiMessageDiv, accumulatedText);
 
         // 如果 Notion 脚本已启用，调用同步功能
         if (window.notionEnabled) {
-            syncToNotion(accumulatedText);
+            syncToNotion(`Q: ${userInput}\n\nA: ${aiMessageDiv.textContent}`);
         }
     } catch (error) {
         console.error("请求失败：", error);
-        const errorMessage = "请求失败，请检查网络或API设置。";
+        const errorMessage = error.message || "请求失败，请检查网络或API设置。";
         showLive2DMessage(errorMessage);
-        aiMessageDiv.textContent = errorMessage;
         
         // 即使是错误消息，也添加删除按钮
         finalizeAiMessage(aiMessageDiv, errorMessage);
@@ -336,45 +286,94 @@ function createParticleExplosion(element, particleCount = 150) {
     });
 }
 
+// 显示确认对话框 - 完全重构以确保居中定位
+function showConfirmDialog(title, message) {
+    return new Promise(resolve => {
+        // 首先移除所有已存在的对话框
+        document.querySelectorAll('.confirm-dialog').forEach(el => el.remove());
+        
+        // 创建背景遮罩层
+        const overlay = document.createElement('div');
+        
+        // 使用固定样式，避免任何外部CSS干扰
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '10000';
+        
+        // 创建对话框容器
+        const dialog = document.createElement('div');
+        
+        // 对话框样式 - 完全固定，避免继承
+        dialog.style.position = 'relative';
+        dialog.style.width = '300px';
+        dialog.style.maxWidth = '90%';
+        dialog.style.backgroundColor = '#ffffff';
+        dialog.style.borderRadius = '8px';
+        dialog.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        dialog.style.padding = '20px';
+        dialog.style.textAlign = 'center';
+        dialog.style.transform = 'translateY(0)';
+        dialog.style.margin = '0';
+        
+        // 设置内容
+        dialog.innerHTML = `
+            <h3 style="margin-top:0; margin-bottom:10px; color:#333; font-size:18px;">${title}</h3>
+            <p style="margin-bottom:20px; color:#666; font-size:14px;">${message}</p>
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button id="confirm-cancel-btn" style="padding:8px 16px; border:none; border-radius:6px; background-color:#e2e8f0; color:#475569; font-weight:500; cursor:pointer;">取消</button>
+                <button id="confirm-ok-btn" style="padding:8px 16px; border:none; border-radius:6px; background-color:#ef4444; color:white; font-weight:500; cursor:pointer;">确认删除</button>
+            </div>
+        `;
+        
+        // 将对话框添加到遮罩层
+        overlay.appendChild(dialog);
+        
+        // 将遮罩层添加到body
+        document.body.appendChild(overlay);
+        
+        // 防止滚动
+        const originalBodyStyle = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        
+        // 给取消按钮添加点击事件
+        const cancelBtn = dialog.querySelector('#confirm-cancel-btn');
+        cancelBtn.addEventListener('click', () => {
+            document.body.style.overflow = originalBodyStyle;
+            overlay.remove();
+            resolve(false);
+        });
+        
+        // 给确认按钮添加点击事件
+        const okBtn = dialog.querySelector('#confirm-ok-btn');
+        okBtn.addEventListener('click', () => {
+            document.body.style.overflow = originalBodyStyle;
+            overlay.remove();
+            resolve(true);
+        });
+    });
+}
+
 // 清除单个消息
 async function deleteMessage(messageElement) {
     if (!messageElement) return;
     
-    // 在执行删除前，停止所有可能的交互
-    messageElement.style.pointerEvents = 'none';
+    // 显示确认对话框，等待用户确认
+    const confirmed = await showConfirmDialog('确定要删除这条消息吗？', '此操作不可撤销。');
     
-    // 执行粒子效果并等待完成
-    await createParticleExplosion(messageElement);
-    
-    // 消息元素已在createParticleExplosion中被移除
-}
-
-// 显示确认对话框
-function showConfirmDialog(title, message) {
-    return new Promise(resolve => {
-        const dialog = document.createElement('div');
-        dialog.className = 'confirm-dialog';
-        dialog.innerHTML = `
-            <h3>${title}</h3>
-            <p>${message}</p>
-            <div class="confirm-dialog-buttons">
-                <button class="confirm-dialog-cancel">取消</button>
-                <button class="confirm-dialog-confirm">确认删除</button>
-            </div>
-        `;
+    if (confirmed) {
+        // 在执行删除前，停止所有可能的交互
+        messageElement.style.pointerEvents = 'none';
         
-        document.body.appendChild(dialog);
-        
-        // 添加按钮事件
-        dialog.querySelector('.confirm-dialog-cancel').onclick = () => {
-            dialog.remove();
-            resolve(false);
-        };
-        dialog.querySelector('.confirm-dialog-confirm').onclick = () => {
-            dialog.remove();
-            resolve(true);
-        };
-    });
+        // 执行粒子效果并等待完成
+        await createParticleExplosion(messageElement);
+    }
 }
 
 // 清空所有对话记录

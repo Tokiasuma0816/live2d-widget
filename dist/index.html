@@ -8,10 +8,13 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/settings.css">
+    <!-- 错误处理首先加载 -->
+    <script src="js/error-handler.js"></script>
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.3/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.4/dist/autoload.js"></script>
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
+    <script src="js/models.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/notion.js"></script>
     <script src="js/notion-debug.js"></script>
@@ -63,31 +66,67 @@
         <div class="settings-container">
             <h3>设置面板</h3>
             
-            <!-- Gemini AI 设置 -->
+            <!-- 聊天模型设置 - 优化版 -->
             <div class="settings-section">
-                <div class="settings-header" onclick="toggleSection('gemini')">
+                <div class="settings-header" onclick="toggleSection('models')">
                     <h4>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            <path d="M12 2c-4.4 0-8 3.6-8 8 0 3 1.7 5.8 4 7.1V19c0 .6.4 1 1 1h6c.6 0 1-.4 1-1v-1.9c2.3-1.3 4-4.1 4-7.1 0-4.4-3.6-8-8-8zm0 14.5c-.4 0-.8-.1-1.2-.2v-5.2c0-.4.3-.7.7-.7h1c.4 0 .7.3.7.7v5.2c-.4.1-.8.2-1.2.2z" />
                         </svg>
-                        Gemini AI 设置
+                        聊天模型设置
                     </h4>
                     <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M7 10l5 5 5-5z"/>
                     </svg>
                 </div>
-                <div class="settings-content" id="gemini-section">
+                <div class="settings-content" id="models-section">
                     <div class="settings-field">
-                        <label for="api-key">API Key</label>
-                        <input type="text" id="api-key" placeholder="输入你的 Gemini API Key">
+                        <label for="model-select">选择模型</label>
+                        <select id="model-select" onchange="changeModelSettings()">
+                            <option value="gemini">Google Gemini</option>
+                            <option value="grok">xAI Grok</option>
+                        </select>
                     </div>
-                    <div class="settings-field">
-                        <label for="proxy-url">代理地址</label>
-                        <input type="text" id="proxy-url" placeholder="输入 API 代理地址">
+                    
+                    <!-- Gemini API设置 -->
+                    <div class="model-settings" id="gemini-settings">
+                        <div class="settings-field">
+                            <label for="gemini-api-key">Gemini API Key</label>
+                            <input type="text" id="gemini-api-key" placeholder="输入你的 Gemini API Key">
+                        </div>
+                        <div class="settings-field">
+                            <label for="gemini-proxy-url">Gemini 代理地址</label>
+                            <input type="text" id="gemini-proxy-url" placeholder="输入 Gemini API 代理地址">
+                        </div>
+                        <div class="settings-field">
+                            <label for="custom-prompt">自定义 Prompt</label>
+                            <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+                        </div>
                     </div>
-                    <div class="settings-field">
-                        <label for="custom-prompt">自定义 Prompt</label>
-                        <textarea id="custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+                    
+                    <!-- Grok API设置 -->
+                    <div class="model-settings" id="grok-settings" style="display: none;">
+                        <div class="settings-field">
+                            <label for="grok-api-key">Grok API Key</label>
+                            <input type="text" id="grok-api-key" placeholder="输入你的 xAI Grok API Key">
+                        </div>
+                        <div class="settings-field">
+                            <label for="grok-model">Grok 模型</label>
+                            <select id="grok-model">
+                                <option value="grok-1">Grok-1</option>
+                                <option value="grok-1-mini">Grok-1-mini</option>
+                                <option value="grok-2">Grok-2 (最新)</option>
+                                <option value="grok-2-mini">Grok-2-mini</option>
+                            </select>
+                        </div>
+                        <div class="settings-field">
+                            <label for="grok-proxy-url">Grok 代理地址</label>
+                            <input type="text" id="grok-proxy-url" placeholder="输入Grok API代理地址">
+                        </div>
+                        <div class="settings-field">
+                            <label for="grok-custom-prompt">自定义 Prompt</label>
+                            <textarea id="grok-custom-prompt" placeholder="在这里输入你的 AI 风格设定..."></textarea>
+                        </div>
                     </div>
                 </div>
             </div>

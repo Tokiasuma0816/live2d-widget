@@ -494,3 +494,20 @@ textarea {
         height: 42px;
     }
 }
+
+/* 确认对话框样式 - 修复位置问题 */
+.confirm-dialog {
+    /* 移除现有样式，在JS中直接设置内联样式 */
+}
+
+/* 移除可能干扰的样式 */
+.confirm-dialog > div {
+    /* 移除现有样式，在JS中直接设置内联样式 */
+}
+
+/* 删除确认对话框按钮样式，改为内联样式 */
+.confirm-dialog-buttons,
+.confirm-dialog-cancel,
+.confirm-dialog-confirm {
+    /* 移除现有样式，在JS中直接设置内联样式 */
+}

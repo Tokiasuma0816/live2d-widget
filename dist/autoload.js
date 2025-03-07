@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.3/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.4/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -70,19 +70,39 @@ function showSettingsDialog() {
     document.body.appendChild(dialog);
 }
 
-// 显示 Live2D 消息
+// 显示 Live2D 消息 - 统一函数定义
 function showLive2dMessage(text, timeout = 4000) {
-    const tips = document.getElementById("waifu-tips");
-    if (!tips) return;
-    
-    tips.innerHTML = text;
-    tips.classList.add("waifu-tips-active");
-    
-    clearTimeout(window._tipsTimer);
-    window._tipsTimer = setTimeout(() => {
-        tips.classList.remove("waifu-tips-active");
-    }, timeout);
+    try {
+        // 尝试使用全局showMessage函数
+        if (typeof window.showMessage === "function") {
+            window.showMessage(text, timeout);
+            return;
+        }
+        
+        // 尝试使用全局showLive2dTips函数
+        if (typeof window.showLive2dTips === "function") {
+            window.showLive2dTips(text, timeout, 9);
+            return;
+        }
+        
+        // 后备方案：直接操作DOM
+        const tips = document.getElementById("waifu-tips");
+        if (!tips) return;
+        
+        tips.innerHTML = text;
+        tips.classList.add("waifu-tips-active");
+        
+        clearTimeout(window._tipsTimer);
+        window._tipsTimer = setTimeout(() => {
+            tips.classList.remove("waifu-tips-active");
+        }, timeout);
+    } catch (err) {
+        console.warn("显示消息失败:", err);
+    }
 }
+
+// 替换原有函数
+window.showLive2DMessage = showLive2dMessage;
 
 // 保存设置 - 简化版
 function saveSettings() {
