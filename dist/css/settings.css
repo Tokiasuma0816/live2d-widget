@@ -224,6 +224,7 @@
     background-color: rgba(248, 250, 252, 0.5);
     margin-top: 15px;
     transition: all 0.3s ease;
+    display: none; /* 默认隐藏，通过JavaScript控制显示 */
 }
 
 #model-select {
@@ -257,6 +258,10 @@
 .model-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.model-settings[style*="display: block"] {
+    display: block !important; /* 强制显示 */
 }
 
 /* 响应式调整 */

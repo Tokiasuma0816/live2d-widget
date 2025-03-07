@@ -125,6 +125,28 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // 加载配置
     loadConfig();
+    
+    // 确保模型选择正确初始化
+    setTimeout(() => {
+        try {
+            const modelSelect = document.getElementById('model-select');
+            if (modelSelect) {
+                // 获取当前存储的模型选择
+                const savedModel = localStorage.getItem("active_model") || 'gemini';
+                console.log("正在初始化模型选择, 保存的模型是:", savedModel);
+                
+                // 设置下拉框值
+                modelSelect.value = savedModel;
+                
+                // 手动触发切换函数
+                if (typeof window.changeModelSettings === 'function') {
+                    window.changeModelSettings();
+                }
+            }
+        } catch (err) {
+            console.error("初始化模型选择时出错:", err);
+        }
+    }, 500);
 });
 
 // 导出全局函数

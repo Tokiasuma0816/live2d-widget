@@ -168,6 +168,7 @@ function changeModelSettings() {
     if (!modelSelect) return;
     
     const selectedModel = modelSelect.value;
+    console.log("切换模型到:", selectedModel); // 添加调试日志
     
     // 隐藏所有模型设置
     const modelSettings = document.querySelectorAll('.model-settings');
@@ -179,7 +180,20 @@ function changeModelSettings() {
     const selectedSettings = document.getElementById(`${selectedModel}-settings`);
     if (selectedSettings) {
         selectedSettings.style.display = 'block';
+    } else {
+        console.error(`未找到ID为 ${selectedModel}-settings 的元素`); // 添加错误日志
     }
+    
+    // 强制更新DOM，解决某些浏览器渲染问题
+    setTimeout(() => {
+        const container = document.querySelector('.settings-container');
+        if (container) {
+            // 触发重排，强制浏览器重新渲染
+            container.style.display = 'none';
+            void container.offsetHeight; // 触发回流
+            container.style.display = '';
+        }
+    }, 10);
 }
 
 // 获取当前配置
