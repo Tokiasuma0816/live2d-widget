@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,7 @@
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.1/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.2/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
@@ -42,6 +42,20 @@
     <script src="js/chat.js"></script>
     <script src="js/browser-fixes.js"></script> <!-- 新增修复脚本 -->
     <script src="js/model-cards.js"></script>
+    
+    <!-- KaTeX - 数学公式支持 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" 
+          integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" 
+          crossorigin="anonymous">
+    
+    <!-- 代码高亮支持 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    
+    <!-- 字体图标库 -->
+    <script src="https://kit.fontawesome.com/your-code-here.js" crossorigin="anonymous"></script>
+    
+    <!-- 浏览器兼容性修复 -->
+    <link rel="stylesheet" href="css/browser-compatibility.css">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -277,5 +291,22 @@
         }
     });
 </script>
+
+    <!-- 在底部添加JavaScript库 -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" 
+            integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" 
+            crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" 
+            integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" 
+            crossorigin="anonymous" defer></script>
+    
+    <!-- 代码高亮 -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js" defer></script>
 </body>
 </html>

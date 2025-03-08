@@ -187,26 +187,10 @@ function updateMessageWithStreamContent(messageDiv, text) {
  * @param {string} text 文本内容
  */
 function updateMessageWithContent(contentElement, text) {
-    // 处理数学公式：$inline math$ 和 $$block math$$
-    let formattedText = text
-        // 块级数学公式: $$...$$
-        .replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-block">$$$1$$</div>')
-        // 行内数学公式: $...$
-        .replace(/\$([^\$]*?)\$/g, '<span class="math-inline">\\($1\\)</span>');
+    // 保存原始文本用于后续处理
+    let formattedText = text;
     
-    // 处理标题格式 (# H1, ## H2, ### H3)
-    formattedText = formattedText
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
-        .replace(/^###### (.+)$/gm, '<h6>$1</h6>');
-    
-    // 处理引用块 (> quote)
-    formattedText = formattedText.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-    
-    // 处理代码块 (```code```)
+    // 处理代码块 (```code```) - 优先处理，避免干扰其他标记
     formattedText = formattedText.replace(/```([\s\S]*?)```/g, function(match, code) {
         // 提取语言信息
         const firstLine = code.trim().split('\n')[0];
@@ -219,11 +203,30 @@ function updateMessageWithContent(contentElement, text) {
             codeContent = code.substring(firstLine.length).trim();
         }
         
-        return `<pre><code class="language-${language}">${codeContent}</code></pre>`;
+        // 防止代码块内容被其他规则处理
+        return `<pre><code class="language-${language}">${codeContent.replace(/\$/g, '&#36;')}</code></pre>`;
     });
     
-    // 处理行内代码 (`code`)
-    formattedText = formattedText.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // 处理行内代码 (`code`) - 同样需要优先处理
+    formattedText = formattedText.replace(/`([^`]+)`/g, function(match, code) {
+        return `<code>${code.replace(/\$/g, '&#36;')}</code>`;
+    });
+    
+    // 标记LaTeX公式范围 - 使用特殊标记避免被其他Markdown规则处理
+    formattedText = formattedText.replace(/\$\$([\s\S]*?)\$\$/g, '%%MATH_BLOCK%%$$$1$$%%/MATH_BLOCK%%');
+    formattedText = formattedText.replace(/\$([^\$\n]+?)\$/g, '%%MATH_INLINE%%$1%%/MATH_INLINE%%');
+    
+    // 处理标题格式 (# H1, ## H2, ### H3)
+    formattedText = formattedText
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^##### (.+)$/gm, '<h5>$1</5>')
+        .replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+    
+    // 处理引用块 (> quote)
+    formattedText = formattedText.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
     
     // 处理强调格式 (粗体、斜体)
     formattedText = formattedText
@@ -305,26 +308,106 @@ function updateMessageWithContent(contentElement, text) {
     // 替换换行符为HTML换行标签
     formattedText = formattedText.replace(/\n/g, '<br>');
     
+    // 还原LaTeX公式标记为HTML元素
+    formattedText = formattedText.replace(/%%MATH_BLOCK%%([\s\S]*?)%%\/MATH_BLOCK%%/g, 
+                                      '<div class="math-block">$1</div>');
+    formattedText = formattedText.replace(/%%MATH_INLINE%%([\s\S]*?)%%\/MATH_INLINE%%/g, 
+                                      '<span class="math-inline">$1</span>');
+    
     // 更新内容
     contentElement.innerHTML = formattedText;
     
-    // 处理数学公式渲染 (如果页面已加载MathJax)
+    // 渲染数学公式
+    renderMathInElement(contentElement);
+}
+
+/**
+ * 渲染元素中的数学公式
+ * @param {HTMLElement} element 要渲染的元素
+ */
+function renderMathInElement(element) {
+    if (!element) return;
+    
+    // 尝试使用MathJax进行渲染（如果存在）
     if (window.MathJax) {
         try {
-            MathJax.typesetPromise([contentElement]).catch(err => console.log('MathJax error:', err));
+            if (typeof window.MathJax.typeset === 'function') {
+                window.MathJax.typeset([element]);
+            } else if (window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([element]).catch(err => {
+                    console.warn('MathJax渲染警告:', err);
+                });
+            } else if (window.MathJax.Hub && typeof window.MathJax.Hub.Queue === 'function') {
+                window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, element]);
+            }
         } catch (e) {
-            console.error('MathJax rendering failed:', e);
+            console.error('MathJax渲染错误:', e);
         }
+    }
+    // 尝试使用KaTeX进行渲染（如果存在）
+    else if (window.katex && typeof window.katex.renderMathInElement === 'function') {
+        try {
+            window.katex.renderMathInElement(element, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ],
+                throwOnError: false
+            });
+        } catch (e) {
+            console.error('KaTeX渲染错误:', e);
+        }
+    }
+    // 尝试加载KaTeX
+    else {
+        loadKaTeX().then(() => {
+            renderMathInElement(element);  // 重试渲染
+        }).catch(err => {
+            console.error('无法加载KaTeX:', err);
+        });
     }
 }
 
 /**
- * 格式化错误消息
- * @param {string} message 错误消息文本
- * @returns {string} 格式化后的HTML
+ * 加载KaTeX库
+ * @returns {Promise} 加载完成的Promise
  */
-function formatErrorMessage(message) {
-    return `<span style="color: #e53e3e;">错误: ${message}</span>`;
+function loadKaTeX() {
+    return new Promise((resolve, reject) => {
+        // 如果已经加载，直接返回
+        if (window.katex) {
+            resolve();
+            return;
+        }
+        
+        // 加载KaTeX CSS
+        const katexCSS = document.createElement('link');
+        katexCSS.rel = 'stylesheet';
+        katexCSS.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
+        katexCSS.integrity = 'sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn';
+        katexCSS.crossOrigin = 'anonymous';
+        document.head.appendChild(katexCSS);
+        
+        // 加载KaTeX JS
+        const katexScript = document.createElement('script');
+        katexScript.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js';
+        katexScript.integrity = 'sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx';
+        katexScript.crossOrigin = 'anonymous';
+        
+        // 加载auto-render扩展
+        katexScript.onload = () => {
+            const renderScript = document.createElement('script');
+            renderScript.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js';
+            renderScript.integrity = 'sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05';
+            renderScript.crossOrigin = 'anonymous';
+            renderScript.onload = () => resolve();
+            renderScript.onerror = (e) => reject(e);
+            document.head.appendChild(renderScript);
+        };
+        
+        katexScript.onerror = (e) => reject(e);
+        document.head.appendChild(katexScript);
+    });
 }
 
 // 新增函数：完成AI消息的显示，添加删除按钮

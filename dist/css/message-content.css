@@ -65,20 +65,87 @@
   display: block;
 }
 
-/* 数学公式样式 */
+/* 数学公式样式改进 */
 .math-inline {
-  padding: 0.1em 0.2em;
-  background: rgba(0,0,0,0.05);
-  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.2em;
+  color: inherit;
+  font-size: 1.05em;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .math-block {
-  margin: 0.8em 0;
-  padding: 0.7em;
-  background: rgba(0,0,0,0.1);
-  border-radius: 5px;
+  display: block;
+  margin: 1em 0;
+  padding: 0.8em;
+  background: rgba(0,0,0,0.08);
+  border-radius: 8px;
   overflow-x: auto;
   text-align: center;
+  color: inherit;
+}
+
+/* KaTeX 样式适配 */
+.katex-display {
+  margin: 0.5em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.katex {
+  font-size: 1.1em;
+  line-height: 1.2;
+  text-indent: 0;
+  text-rendering: auto;
+}
+
+/* 确保公式在深色背景下可见 */
+.user-message .katex,
+.ai-message .katex {
+  color: white !important;
+}
+
+.user-message .katex-html,
+.ai-message .katex-html {
+  color: white !important;
+}
+
+/* 确保公式容器滚动条美观 */
+.math-block::-webkit-scrollbar {
+  height: 4px;
+}
+
+.math-block::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.math-block::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 4px;
+}
+
+.math-block::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
+}
+
+/* 公式加载中动画 */
+.math-loading {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin: 0 0.1em;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: math-spin 1s linear infinite;
+}
+
+@keyframes math-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* 列表样式 */
