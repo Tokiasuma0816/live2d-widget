@@ -162,13 +162,15 @@ function adjustInputPosition() {
   
   // 根据屏幕大小调整位置
   if (isSmallScreen) {
-    inputContainer.style.bottom = '20px'; // 调整高度确保完全可见
+    inputContainer.style.bottom = '20px';
     
-    // 同时调整messages容器的内边距，确保滚动时能看到所有内容
+    // 调整messages容器的内边距，确保滚动时能看到所有内容
     const messagesContainer = document.getElementById('messages');
     if (messagesContainer) {
       messagesContainer.style.paddingBottom = '150px';
     }
+    
+    // 移除针对看板娘的处理，看板娘在电脑端保持默认设置
   } else if (isMobile) {
     inputContainer.style.bottom = '15px';
     
@@ -176,6 +178,8 @@ function adjustInputPosition() {
     if (messagesContainer) {
       messagesContainer.style.paddingBottom = '120px';
     }
+    
+    // 移除针对看板娘的处理，看板娘在电脑端保持默认设置
   } else {
     // 桌面布局
     inputContainer.style.bottom = '10px';
@@ -184,6 +188,8 @@ function adjustInputPosition() {
     if (messagesContainer) {
       messagesContainer.style.paddingBottom = '80px';
     }
+    
+    // 看板娘在桌面端保持默认设置
   }
 }
 
@@ -204,3 +210,64 @@ window.toggleConfig = toggleConfig;
 window.toggleSection = toggleSection;
 window.toggleDropdownHint = toggleDropdownHint;
 window.showLive2DMessage = showLive2DMessage;
+
+/**
+ * 初始化设置面板UI
+ */
+function initConfigUI() {
+    // 初始化折叠面板
+    initCollapsiblePanels();
+    
+    // 添加按钮波纹效果
+    initButtonRippleEffects();
+}
+
+/**
+ * 添加按钮波纹效果
+ */
+function initButtonRippleEffects() {
+    // 获取所有设置面板按钮
+    const buttons = document.querySelectorAll('.settings-footer button');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // 创建波纹元素
+            const ripple = document.createElement('span');
+            ripple.className = 'btn-ripple';
+            
+            // 计算相对位置
+            const rect = button.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 设置波纹位置
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            
+            // 添加到按钮
+            button.appendChild(ripple);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+}
+
+// 当页面内容加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 覆盖原有的toggleConfig函数
+    const originalToggleConfig = window.toggleConfig || function(){};
+    window.toggleConfig = function() {
+        // 调用原始函数
+        originalToggleConfig.apply(this, arguments);
+        
+        // 检查配置容器是否可见
+        const configContainer = document.getElementById('config-container');
+        if (configContainer && getComputedStyle(configContainer).display === 'flex') {
+            // 配置容器已显示，初始化UI
+            setTimeout(initConfigUI, 100);
+        }
+    };
+});

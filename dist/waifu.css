@@ -84,7 +84,8 @@
 	color: #aaa;
 	opacity: 0;
 	position: absolute;
-	right: -10px; /* 恢复原始位置 */
+	right: -10px;
+	top: 70px;  /* 恢复缺失的top属性 */
 	transition: opacity 1s;
 }
 
@@ -363,8 +364,9 @@
     transition: opacity 0.5s ease;
 }
 
+/* 移除所有与live2d-fixes.js相关的CSS样式 */
 /* 增强工具栏样式，确保在看板娘可见时能正确显示 */
-#waifu-tool {
+/* #waifu-tool {
     display: none;
     position: absolute;
     right: -10px;
@@ -377,9 +379,10 @@
     display: block;
     opacity: 1;
 }
+*/
+
+/* 修复移动设备上的工具栏显示问题 */
+/* @media (max-width: 768px) { ... } */
 
 /* 确保全屏模式下工具栏位置正确 */
-body.fullscreen #waifu-tool {
-    top: 20px;
-    right: -10px; /* 恢复原始位置 */
-}
+/* body.fullscreen #waifu-tool { ... } */

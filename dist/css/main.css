@@ -522,31 +522,15 @@ textarea {
     }
 }
 
-/* 为不同设备优化Live2D位置 */
+/* 为不同设备优化Live2D位置 - 移除这部分，只保留电脑端设置 */
 @media (max-width: 576px) {
-    #waifu {
-        display: none !important; /* 在手机上完全隐藏看板娘，防止干扰 */
-    }
-}
-
-/* 针对特小屏幕的进一步优化 */
-@media (max-width: 576px) {
-    #input-container {
-        bottom: 15px; /* 修改：调整底部间距 */
-        padding: 8px 12px; /* 减小内边距 */
-        border-radius: 16px; /* 更小的圆角 */
-        width: 92%; /* 控制宽度，确保两侧有间距 */
-        max-width: 92%;
-    }
-}
-
-/* 为不同设备优化Live2D位置 */
-@media (max-width: 576px) {
-    #waifu {
-        bottom: 80px !important; /* 确保看板娘不会遮挡输入框 */
-        transform: scale(0.8); /* 稍微缩小看板娘尺寸 */
-        transform-origin: bottom right;
-    }
+  #waifu {
+    /* 不要隐藏看板娘，只调整位置 */
+    bottom: 120px !important; /* 确保在输入框上方 */
+    right: 0 !important;
+    transform: scale(0.8); /* 稍微缩小看板娘尺寸 */
+    transform-origin: bottom right;
+  }
 }
 
 /* 确认对话框样式 - 修复位置问题 */
