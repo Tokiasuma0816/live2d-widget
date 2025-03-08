@@ -1,5 +1,37 @@
-package-lock.json
+# 依赖目录
 node_modules/
-.DS_Store
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnp/
+.pnp.js
+
+# 编辑器目录和文件
 .idea/
 .vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 调试日志
+debug.log
+logs/
+*.log
+
+# 构建输出
+# 注意：由于您将dist目录部署到Cloudflare，请不要忽略它
+# dist/
+
+# 其他
+tmp/
+temp/
+.cache/
+coverage/

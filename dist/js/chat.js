@@ -152,6 +152,7 @@ async function streamAIResponse(userInput, messageDiv) {
                 simulateTyping();
             }
         } catch (error) {
+            console.error("流式处理错误:", error);
             reject(error);
         }
     });
