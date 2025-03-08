@@ -108,33 +108,52 @@
      * 当看板娘重新加载或显示时确保工具栏可见
      */
     function observeLive2dElement() {
-        // 创建一个观察器实例
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'childList') {
-                    // 当有新元素添加时，检查是否是看板娘
-                    const waifu = document.getElementById('waifu');
-                    if (waifu && (waifu.style.display === 'block' || waifu.style.display === '')) {
-                        fixLive2dToolbar();
+        // 检查是否支持MutationObserver
+        if (window.MutationObserver) {
+            // 创建一个观察器实例
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        // 当有新元素添加时，检查是否是看板娘
+                        const waifu = document.getElementById('waifu');
+                        if (waifu && (waifu.style.display === 'block' || waifu.style.display === '')) {
+                            fixLive2dToolbar();
+                        }
+                    } else if (mutation.type === 'attributes' && mutation.target.id === 'waifu') {
+                        // 当看板娘的display属性变化时，修复工具栏
+                        if (mutation.target.style.display === 'block' || mutation.target.style.display === '') {
+                            fixLive2dToolbar();
+                        }
                     }
-                } else if (mutation.type === 'attributes' && mutation.target.id === 'waifu') {
-                    // 当看板娘的display属性变化时，修复工具栏
-                    if (mutation.target.style.display === 'block' || mutation.target.style.display === '') {
-                        fixLive2dToolbar();
-                    }
-                }
+                });
             });
-        });
-        
-        // 配置观察选项
-        const config = { 
-            childList: true, 
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style']
-        };
-        
-        // 开始观察文档body
-        observer.observe(document.body, config);
+            
+            // 配置观察选项
+            const config = { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style']
+            };
+            
+            // 开始观察文档body
+            observer.observe(document.body, config);
+        } else {
+            // 回退方案：定期检查
+            setInterval(checkWaifuVisibility, 1000);
+        }
     }
+    
+    /**
+     * 回退方案：定期检查看板娘可见性
+     */
+    function checkWaifuVisibility() {
+        const waifu = document.getElementById('waifu');
+        if (waifu && (waifu.style.display === 'block' || waifu.style.display === '')) {
+            fixLive2dToolbar();
+        }
+    }
+    
+    // 导出全局函数，以便可能的外部调用
+    window.fixLive2dToolbar = fixLive2dToolbar;
 })();

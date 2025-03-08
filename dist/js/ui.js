@@ -153,7 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // 添加输入框位置调整功能
 function adjustInputPosition() {
   const inputContainer = document.getElementById('input-container');
-  const waifu = document.getElementById('waifu');
   
   if (!inputContainer) return;
   
@@ -163,46 +162,27 @@ function adjustInputPosition() {
   
   // 根据屏幕大小调整位置
   if (isSmallScreen) {
-    inputContainer.style.bottom = '15px'; // 修改：增加底部间距以显示圆角
+    inputContainer.style.bottom = '20px'; // 调整高度确保完全可见
     
     // 同时调整messages容器的内边距，确保滚动时能看到所有内容
     const messagesContainer = document.getElementById('messages');
     if (messagesContainer) {
-      messagesContainer.style.paddingBottom = '130px';
-    }
-    
-    // 调整看板娘位置
-    if (waifu) {
-      waifu.style.bottom = '80px'; // 修改：调整看板娘位置
-      waifu.style.transform = 'scale(0.8)';
-      waifu.style.transformOrigin = 'bottom right';
+      messagesContainer.style.paddingBottom = '150px';
     }
   } else if (isMobile) {
-    inputContainer.style.bottom = '10px'; // 修改：增加底部间距
+    inputContainer.style.bottom = '15px';
     
     const messagesContainer = document.getElementById('messages');
     if (messagesContainer) {
-      messagesContainer.style.paddingBottom = '100px';
-    }
-    
-    // 还原看板娘样式，但保持位置
-    if (waifu) {
-      waifu.style.bottom = '70px';
-      waifu.style.transform = '';
+      messagesContainer.style.paddingBottom = '120px';
     }
   } else {
     // 桌面布局
-    inputContainer.style.bottom = '10px'; // 修改：增加底部间距
+    inputContainer.style.bottom = '10px';
     
     const messagesContainer = document.getElementById('messages');
     if (messagesContainer) {
       messagesContainer.style.paddingBottom = '80px';
-    }
-    
-    // 桌面布局还原看板娘位置
-    if (waifu) {
-      waifu.style.bottom = '0';
-      waifu.style.transform = '';
     }
   }
 }

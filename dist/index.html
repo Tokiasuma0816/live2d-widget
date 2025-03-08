@@ -9,12 +9,15 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/settings.css">
     <link rel="stylesheet" href="css/model-cards.css">
+    <link rel="stylesheet" href="waifu.css">
     <!-- 错误处理首先加载 -->
     <script src="js/error-handler.js"></script>
     <!-- 加载辅助脚本 -->
     <script src="js/helpers.js"></script>
+    <!-- Live2D修复脚本需要在autoload之前加载 -->
+    <script src="js/live2d-fixes.js"></script>
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.6/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.7/dist/autoload.js"></script>
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
     <script src="js/models.js"></script>
@@ -24,9 +27,6 @@
     <script src="js/chat.js"></script>
     <script src="js/browser-fixes.js"></script> <!-- 新增修复脚本 -->
     <script src="js/model-cards.js"></script>
-    <!-- 新增: Live2D修复脚本 -->
-    <script src="js/live2d-fixes.js"></script>
-    <!-- 不需要额外的看板娘退出效果脚本 -->
 </head>
 <body>
     <!-- 导航栏 -->

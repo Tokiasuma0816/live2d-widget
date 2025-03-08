@@ -509,6 +509,29 @@ textarea {
 /* 针对特小屏幕的进一步优化 */
 @media (max-width: 576px) {
     #input-container {
+        bottom: 20px; /* 调高位置，确保输入框完全可见 */
+        padding: 8px 12px;
+        border-radius: 16px;
+        width: 94%; /* 略微增加宽度让输入框更容易看到 */
+        max-width: 94%;
+        z-index: 1050; /* 确保输入框在看板娘之上 */
+    }
+    
+    #messages {
+        padding-bottom: 150px; /* 增加底部内边距，确保内容不被输入框遮挡 */
+    }
+}
+
+/* 为不同设备优化Live2D位置 */
+@media (max-width: 576px) {
+    #waifu {
+        display: none !important; /* 在手机上完全隐藏看板娘，防止干扰 */
+    }
+}
+
+/* 针对特小屏幕的进一步优化 */
+@media (max-width: 576px) {
+    #input-container {
         bottom: 15px; /* 修改：调整底部间距 */
         padding: 8px 12px; /* 减小内边距 */
         border-radius: 16px; /* 更小的圆角 */
