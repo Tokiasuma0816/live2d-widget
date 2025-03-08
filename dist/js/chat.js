@@ -222,7 +222,7 @@ function updateMessageWithContent(contentElement, text) {
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^##### (.+)$/gm, '<h5>$1</5>')
+        .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
         .replace(/^###### (.+)$/gm, '<h6>$1</h6>');
     
     // 处理引用块 (> quote)
