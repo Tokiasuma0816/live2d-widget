@@ -142,7 +142,7 @@ const GeminiAPI = {
     }
 };
 
-// xAI Grok模型API - 改进错误处理和流式支持
+// xAI Grok模型API - 改进直接调用方式，不需要转换成OpenAI格式
 const GrokAPI = {
     // 发送聊天消息
     sendMessage: async function(message) {
@@ -156,7 +156,7 @@ const GrokAPI = {
         try {
             console.log(`使用Grok模型: ${model}`);
             
-            // 确定API端点 - 修复URL格式
+            // 确定API端点 - 直接使用xAI官方格式
             let chatEndpoint;
             
             if (proxyUrl) {
@@ -167,9 +167,9 @@ const GrokAPI = {
                 chatEndpoint = "https://api.xai.com/v1/chat/completions";
             }
             
-            // 实际API请求
+            // 使用xAI官方API格式，不再转换为OpenAI格式
             const payload = {
-                model: model || "grok-2", // 使用选择的模型 
+                model: model || "grok-2", 
                 messages: [
                     { 
                         role: "system", 
@@ -193,7 +193,7 @@ const GrokAPI = {
                 body: JSON.stringify(payload)
             });
             
-            // 简单状态检查，不记录详细状态
+            // 简单状态检查
             if (response.status === 401) {
                 return {
                     success: false,
@@ -201,15 +201,12 @@ const GrokAPI = {
                 };
             }
             
-            // 其他HTTP错误
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // 解析JSON但不输出详细内容
+            // 直接解析xAI官方格式响应
             const data = await response.json();
-            
-            // 只提取所需信息，不记录整个响应对象
             const content = data.choices?.[0]?.message?.content || "抱歉，我现在无法回答这个问题。";
             
             return {
@@ -217,20 +214,15 @@ const GrokAPI = {
                 message: content
             };
         } catch (error) {
-            // 根据错误类型给出具体提示
+            // 更详细的错误处理
             let errorMessage = "请求失败，请检查网络或API设置。";
             
-            // 处理可能的不同错误类型
             if (error.name === "AbortError") {
                 errorMessage = "请求超时，请检查您的网络连接或API代理配置。";
             } else if (error.message.includes("NetworkError") || error.message.includes("Failed to fetch")) {
                 errorMessage = proxyUrl 
                     ? "网络错误，无法连接到代理服务器，请检查代理地址是否正确。" 
                     : "网络错误，请确认您能够访问xAI API (api.xai.com)。请考虑配置代理地址。";
-            } else if (error.message.includes("JSON")) {
-                errorMessage = "响应格式错误，API返回的不是有效的JSON数据。";
-            } else if (error.message.includes("CORS")) {
-                errorMessage = "CORS错误: 代理服务器未正确设置跨域访问权限。请联系代理服务提供者。";
             }
             
             return {
@@ -240,7 +232,7 @@ const GrokAPI = {
         }
     },
     
-    // 修复Grok流式处理支持
+    // 流式请求 - 直接使用xAI官方流式API格式
     sendStreamMessage: async function(message, onChunk) {
         const config = getModelConfig();
         const { apiKey, model, proxyUrl, customPrompt } = config.models.grok;
@@ -252,20 +244,18 @@ const GrokAPI = {
         try {
             console.log(`使用Grok模型 (流式): ${model}`);
             
-            // 确定API端点 - 修复URL格式
             let chatEndpoint;
             
             if (proxyUrl) {
-                // 移除多余的斜杠，防止路径重复
                 const baseUrl = proxyUrl.endsWith('/') ? proxyUrl.slice(0, -1) : proxyUrl;
                 chatEndpoint = `${baseUrl}/v1/chat/completions`;
             } else {
                 chatEndpoint = "https://api.xai.com/v1/chat/completions";
             }
             
-            // 实际API请求
+            // 流式请求使用标准的流式参数 stream: true
             const payload = {
-                model: model || "grok-2", // 使用选择的模型
+                model: model || "grok-2",
                 messages: [
                     { 
                         role: "system", 
@@ -277,14 +267,17 @@ const GrokAPI = {
                     }
                 ],
                 temperature: 0.7,
-                stream: true // 开启流式处理
+                stream: true
             };
             
-            // 表明需要流式响应的头部
+            // 特别指定需要流式响应的头部
             const headers = {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${apiKey}`,
-                "Accept": "text/event-stream"
+                "Accept": "text/event-stream",
+                // 添加防缓存头部解决Cloudflare缓存问题
+                "X-No-Cache": Date.now().toString(),
+                "Cache-Control": "no-cache, no-store"
             };
             
             const response = await fetch(chatEndpoint, {
@@ -300,7 +293,7 @@ const GrokAPI = {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // 处理流式响应
+            // 处理流式响应 - 标准SSE格式处理
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
             let accumulatedText = "";
@@ -310,31 +303,22 @@ const GrokAPI = {
                 const { done, value } = await reader.read();
                 if (done) break;
                 
-                // 解码接收到的数据块
                 buffer += decoder.decode(value, {stream: true});
                 
-                // 分割数据流为单独的SSE消息
                 const lines = buffer.split('\n\n');
-                buffer = lines.pop() || ""; // 保留未完成的行作为新的缓冲
+                buffer = lines.pop() || "";
                 
                 for (const line of lines) {
-                    if (!line.trim()) continue; // 跳过空行
+                    if (!line.trim()) continue;
                     
-                    // 标准SSE格式以"data: "开头，可能有多行
                     const dataLines = line.split('\n');
-                    let dataJson = "";
                     
-                    // 处理每个SSE消息行
                     for (const dataLine of dataLines) {
                         if (dataLine.startsWith("data: ")) {
                             const content = dataLine.slice(5).trim();
                             
-                            // 处理流结束标记
-                            if (content === "[DONE]") {
-                                continue;
-                            }
+                            if (content === "[DONE]") continue;
                             
-                            // 解析JSON内容
                             try {
                                 const json = JSON.parse(content);
                                 const delta = json.choices?.[0]?.delta;
@@ -343,7 +327,6 @@ const GrokAPI = {
                                     const newContent = delta.content;
                                     accumulatedText += newContent;
                                     
-                                    // 回调通知新内容
                                     if (onChunk) {
                                         onChunk(newContent, accumulatedText);
                                     }
@@ -356,11 +339,11 @@ const GrokAPI = {
                 }
             }
             
-            // 流式响应完成
             return {
                 success: true,
                 message: accumulatedText
             };
+            
         } catch (error) {
             let errorMessage = "流式请求失败，请检查网络或API设置。";
             
