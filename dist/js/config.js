@@ -4,11 +4,13 @@ const currentConfig = {
     models: {
         gemini: {
             apiKey: '',
-            proxyUrl: ''
+            model: 'gemini-1.5-flash', // 更新默认为最新版模型
+            proxyUrl: '',
+            customPrompt: ''
         },
         grok: {
             apiKey: '',
-            model: 'grok-2', // 更新默认为最新版Grok模型
+            model: 'grok-2', // 只使用可用的Grok模型
             proxyUrl: '', // 添加代理URL支持
             customPrompt: '' // 添加Grok自定义Prompt
         }
@@ -30,6 +32,8 @@ function loadConfig() {
         // 加载Gemini设置
         currentConfig.models.gemini.apiKey = localStorage.getItem("gemini_api_key") || '';
         currentConfig.models.gemini.proxyUrl = localStorage.getItem("gemini_proxy_url") || '';
+        currentConfig.models.gemini.model = localStorage.getItem("gemini_model") || 'gemini-1.5-flash';
+        currentConfig.models.gemini.customPrompt = localStorage.getItem("gemini_custom_prompt") || '';
         
         // 加载Grok设置
         currentConfig.models.grok.apiKey = localStorage.getItem("grok_api_key") || '';
@@ -60,42 +64,11 @@ function saveConfig() {
             localStorage.setItem("active_model", currentConfig.activeModel);
         }
         
-        // 保存Gemini设置
-        const geminiApiKey = document.getElementById('gemini-api-key');
-        const geminiProxyUrl = document.getElementById('gemini-proxy-url');
-        const customPrompt = document.getElementById('custom-prompt');
+        // 保存Gemini设置 - 优先使用弹出设置中的值
+        saveModelSettings('gemini');
         
-        if (geminiApiKey && geminiProxyUrl) {
-            currentConfig.models.gemini.apiKey = geminiApiKey.value;
-            currentConfig.models.gemini.proxyUrl = geminiProxyUrl.value;
-            localStorage.setItem("gemini_api_key", geminiApiKey.value);
-            localStorage.setItem("gemini_proxy_url", geminiProxyUrl.value);
-            // 兼容旧版本
-            localStorage.setItem("api_key", geminiApiKey.value);
-            localStorage.setItem("proxy_url", geminiProxyUrl.value);
-        }
-        
-        // 保存自定义Prompt
-        if (customPrompt) {
-            currentConfig.customPrompt = customPrompt.value;
-            localStorage.setItem("custom_prompt", customPrompt.value);
-        }
-        
-        // 保存Grok设置
-        const grokApiKey = document.getElementById('grok-api-key');
-        const grokModel = document.getElementById('grok-model');
-        const grokProxyUrl = document.getElementById('grok-proxy-url');
-        const grokCustomPrompt = document.getElementById('grok-custom-prompt');
-        if (grokApiKey && grokModel && grokProxyUrl && grokCustomPrompt) {
-            currentConfig.models.grok.apiKey = grokApiKey.value;
-            currentConfig.models.grok.model = grokModel.value;
-            currentConfig.models.grok.proxyUrl = grokProxyUrl.value;
-            currentConfig.models.grok.customPrompt = grokCustomPrompt.value;
-            localStorage.setItem("grok_api_key", grokApiKey.value);
-            localStorage.setItem("grok_model", grokModel.value);
-            localStorage.setItem("grok_proxy_url", grokProxyUrl.value);
-            localStorage.setItem("grok_custom_prompt", grokCustomPrompt.value);
-        }
+        // 保存Grok设置 - 优先使用弹出设置中的值
+        saveModelSettings('grok');
         
         // 保存Notion设置
         const notionToken = document.getElementById('notion-token');
@@ -124,34 +97,29 @@ function updateConfigUI() {
     const modelSelect = document.getElementById('model-select');
     if (modelSelect) {
         modelSelect.value = currentConfig.activeModel;
-        changeModelSettings();
+        
+        // 更新常规设置视图和弹出设置视图
+        document.querySelectorAll('.model-settings, [id$="-settings-popup"]').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        
+        // 更新模型卡片选中状态
+        setTimeout(() => {
+            document.querySelectorAll('.model-card').forEach(card => {
+                if (card.dataset.modelId === currentConfig.activeModel) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }, 200);
     }
     
-    // 设置Gemini值
-    const geminiApiKey = document.getElementById('gemini-api-key');
-    const geminiProxyUrl = document.getElementById('gemini-proxy-url');
-    const customPrompt = document.getElementById('custom-prompt');
-    
-    if (geminiApiKey && geminiProxyUrl) {
-        geminiApiKey.value = currentConfig.models.gemini.apiKey;
-        geminiProxyUrl.value = currentConfig.models.gemini.proxyUrl;
-    }
-    
-    if (customPrompt) {
-        customPrompt.value = currentConfig.customPrompt;
-    }
+    // 设置Gemini值 (同时更新原始元素和弹出元素)
+    updateModelInputs('gemini');
     
     // 设置Grok值
-    const grokApiKey = document.getElementById('grok-api-key');
-    const grokModel = document.getElementById('grok-model');
-    const grokProxyUrl = document.getElementById('grok-proxy-url');
-    const grokCustomPrompt = document.getElementById('grok-custom-prompt');
-    if (grokApiKey && grokModel && grokProxyUrl && grokCustomPrompt) {
-        grokApiKey.value = currentConfig.models.grok.apiKey;
-        grokModel.value = currentConfig.models.grok.model;
-        grokProxyUrl.value = currentConfig.models.grok.proxyUrl;
-        grokCustomPrompt.value = currentConfig.models.grok.customPrompt;
-    }
+    updateModelInputs('grok');
     
     // 设置Notion值
     const notionToken = document.getElementById('notion-token');
@@ -162,38 +130,221 @@ function updateConfigUI() {
     }
 }
 
-// 切换模型设置视图
+/**
+ * 更新特定模型的所有输入值
+ * @param {string} modelType 模型类型
+ */
+function updateModelInputs(modelType) {
+    // 更新基本输入
+    const apiKey = document.getElementById(`${modelType}-api-key`);
+    const proxyUrl = document.getElementById(`${modelType}-proxy-url`);
+    const modelSelect = document.getElementById(`${modelType}-model`);
+    let prompt;
+    
+    if (modelType === 'gemini') {
+        prompt = document.getElementById('custom-prompt');
+    } else {
+        prompt = document.getElementById(`${modelType}-custom-prompt`);
+    }
+    
+    const config = currentConfig.models[modelType];
+    
+    // 更新原始表单元素
+    if (apiKey) apiKey.value = config.apiKey || '';
+    if (proxyUrl) proxyUrl.value = config.proxyUrl || '';
+    if (modelSelect) modelSelect.value = config.model || '';
+    if (prompt) prompt.value = config.customPrompt || '';
+    
+    // 更新弹出设置表单元素
+    const popupApiKey = document.getElementById(`${modelType}-api-key-popup`);
+    const popupProxyUrl = document.getElementById(`${modelType}-proxy-url-popup`);
+    const popupModelSelect = document.getElementById(`${modelType}-model-popup`);
+    let popupPrompt;
+    
+    if (modelType === 'gemini') {
+        popupPrompt = document.getElementById('custom-prompt-popup');
+    } else {
+        popupPrompt = document.getElementById(`${modelType}-custom-prompt-popup`);
+    }
+    
+    // 更新弹出窗表单元素
+    if (popupApiKey) popupApiKey.value = config.apiKey || '';
+    if (popupProxyUrl) popupProxyUrl.value = config.proxyUrl || '';
+    if (popupModelSelect) popupModelSelect.value = config.model || '';
+    if (popupPrompt) popupPrompt.value = config.customPrompt || '';
+}
+
+// 创建模型特定的卡片选择界面
+function createModelSpecificCards(modelType) {
+    const modelSelect = document.getElementById(`${modelType}-model`);
+    if (!modelSelect) return;
+    
+    // 检查是否已经创建了卡片视图
+    if (modelSelect.nextElementSibling && modelSelect.nextElementSibling.classList.contains('model-specific-cards')) {
+        return;
+    }
+    
+    // 隐藏原下拉框
+    modelSelect.style.display = 'none';
+    
+    // 创建卡片容器
+    const cardsContainer = document.createElement('div');
+    cardsContainer.className = 'model-specific-cards';
+    
+    // 获取当前选中的模型
+    const currentValue = modelSelect.value;
+    
+    // 根据模型类型创建不同的卡片
+    if (modelType === 'gemini') {
+        // 定义Gemini模型数据
+        const geminiModels = [
+            {
+                id: 'gemini-1.5-flash',
+                name: 'Gemini 1.5 Flash',
+                description: '高速响应，最多1M上下文',
+                tag: '推荐',
+                icon: '⚡'
+            },
+            {
+                id: 'gemini-1.5-pro',
+                name: 'Gemini 1.5 Pro',
+                description: '高性能，最多1M上下文',
+                tag: '高级',
+                icon: '🔥'
+            },
+            {
+                id: 'gemini-pro',
+                name: 'Gemini Pro',
+                description: '标准性能，32k上下文',
+                tag: '稳定',
+                icon: '💎'
+            },
+            {
+                id: 'gemini-pro-vision',
+                name: 'Gemini Vision',
+                description: '支持图像分析',
+                tag: '视觉',
+                icon: '👁️'
+            }
+        ];
+        
+        // 创建并添加卡片
+        geminiModels.forEach(model => {
+            const card = createModelSubCard(model, model.id === currentValue);
+            cardsContainer.appendChild(card);
+            
+            // 添加点击事件
+            card.addEventListener('click', () => {
+                // 更新所有卡片状态
+                cardsContainer.querySelectorAll('.model-subcard').forEach(c => {
+                    c.classList.remove('active');
+                });
+                card.classList.add('active', 'selecting');
+                
+                // 设置选中值
+                modelSelect.value = model.id;
+                
+                // 触发change事件
+                const event = new Event('change', { bubbles: true });
+                modelSelect.dispatchEvent(event);
+                
+                // 延迟移除动画类
+                setTimeout(() => card.classList.remove('selecting'), 800);
+            });
+        });
+    } else if (modelType === 'grok') {
+        // 定义Grok模型数据
+        const grokModels = [
+            {
+                id: 'grok-2',
+                name: 'Grok 2',
+                description: '标准模型，强大通用能力',
+                tag: '推荐',
+                icon: '🚀'
+            },
+            {
+                id: 'grok-2-vision',
+                name: 'Grok Vision',
+                description: '支持图像理解分析',
+                tag: '视觉',
+                icon: '🔍'
+            }
+        ];
+        
+        // 创建并添加卡片
+        grokModels.forEach(model => {
+            const card = createModelSubCard(model, model.id === currentValue);
+            cardsContainer.appendChild(card);
+            
+            // 添加点击事件
+            card.addEventListener('click', () => {
+                // 更新所有卡片状态
+                cardsContainer.querySelectorAll('.model-subcard').forEach(c => {
+                    c.classList.remove('active');
+                });
+                card.classList.add('active', 'selecting');
+                
+                // 设置选中值
+                modelSelect.value = model.id;
+                
+                // 触发change事件
+                const event = new Event('change', { bubbles: true });
+                modelSelect.dispatchEvent(event);
+                
+                // 延迟移除动画类
+                setTimeout(() => card.classList.remove('selecting'), 800);
+            });
+        });
+    }
+    
+    // 插入卡片容器
+    modelSelect.insertAdjacentElement('afterend', cardsContainer);
+}
+
+// 创建模型子卡片
+function createModelSubCard(model, isActive) {
+    const card = document.createElement('div');
+    card.className = `model-subcard ${isActive ? 'active' : ''}`;
+    card.dataset.modelId = model.id;
+    
+    card.innerHTML = `
+        <div class="model-subcard-icon">${model.icon}</div>
+        <div class="model-subcard-content">
+            <div class="model-subcard-title">${model.name}</div>
+            <div class="model-subcard-description">${model.description}</div>
+        </div>
+        <span class="model-subcard-tag">${model.tag}</span>
+    `;
+    
+    // 添加波纹效果
+    card.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.className = 'subcard-ripple';
+        
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        
+        this.appendChild(ripple);
+        
+        setTimeout(() => ripple.remove(), 600);
+    });
+    
+    return card;
+}
+
+// 简化切换模型设置视图函数，不再处理UI显示，由弹出卡片负责
 function changeModelSettings() {
     const modelSelect = document.getElementById('model-select');
     if (!modelSelect) return;
     
     const selectedModel = modelSelect.value;
-    console.log("切换模型到:", selectedModel); // 添加调试日志
     
-    // 隐藏所有模型设置
-    const modelSettings = document.querySelectorAll('.model-settings');
-    modelSettings.forEach(el => {
-        el.style.display = 'none';
-    });
-    
-    // 显示选中的模型设置
-    const selectedSettings = document.getElementById(`${selectedModel}-settings`);
-    if (selectedSettings) {
-        selectedSettings.style.display = 'block';
-    } else {
-        console.error(`未找到ID为 ${selectedModel}-settings 的元素`); // 添加错误日志
-    }
-    
-    // 强制更新DOM，解决某些浏览器渲染问题
-    setTimeout(() => {
-        const container = document.querySelector('.settings-container');
-        if (container) {
-            // 触发重排，强制浏览器重新渲染
-            container.style.display = 'none';
-            void container.offsetHeight; // 触发回流
-            container.style.display = '';
-        }
-    }, 10);
+    // 更新全局配置中的activeModel
+    currentConfig.activeModel = selectedModel;
 }
 
 // 获取当前配置
@@ -206,3 +357,49 @@ window.loadConfig = loadConfig;
 window.saveConfig = saveConfig;
 window.changeModelSettings = changeModelSettings;
 window.getConfig = getConfig;
+
+/**
+ * 保存指定模型的设置
+ * @param {string} modelType 模型类型 (gemini 或 grok)
+ */
+function saveModelSettings(modelType) {
+    // 获取表单元素 - 优先从弹出窗获取，如果没有则从原始表单获取
+    const getInputValue = (id) => {
+        const popupEl = document.getElementById(`${id}-popup`);
+        const originalEl = document.getElementById(id);
+        return (popupEl && popupEl.value !== undefined) ? popupEl.value : 
+               (originalEl ? originalEl.value : '');
+    };
+    
+    const apiKey = getInputValue(`${modelType}-api-key`);
+    const proxyUrl = getInputValue(`${modelType}-proxy-url`);
+    const modelValue = getInputValue(`${modelType}-model`);
+    
+    // 处理prompt的特殊情况
+    let customPrompt;
+    if (modelType === 'gemini') {
+        customPrompt = getInputValue('custom-prompt');
+    } else {
+        customPrompt = getInputValue(`${modelType}-custom-prompt`);
+    }
+    
+    // 更新配置
+    currentConfig.models[modelType].apiKey = apiKey;
+    currentConfig.models[modelType].proxyUrl = proxyUrl;
+    currentConfig.models[modelType].model = modelValue;
+    currentConfig.models[modelType].customPrompt = customPrompt;
+    
+    // 保存到localStorage
+    localStorage.setItem(`${modelType}_api_key`, apiKey);
+    localStorage.setItem(`${modelType}_proxy_url`, proxyUrl);
+    localStorage.setItem(`${modelType}_model`, modelValue);
+    localStorage.setItem(`${modelType}_custom_prompt`, customPrompt);
+    
+    // 特殊处理Gemini的兼容性设置
+    if (modelType === 'gemini') {
+        localStorage.setItem("api_key", apiKey);
+        localStorage.setItem("proxy_url", proxyUrl);
+        currentConfig.customPrompt = customPrompt;
+        localStorage.setItem("custom_prompt", customPrompt);
+    }
+}

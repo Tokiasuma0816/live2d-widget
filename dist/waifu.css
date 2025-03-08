@@ -364,3 +364,38 @@
     opacity: 0;
     transition: opacity 0.5s ease;
 }
+
+/* 增强工具栏样式，确保在看板娘可见时能正确显示 */
+#waifu-tool {
+    display: none;
+    position: absolute;
+    right: -10px;
+    color: #aaa;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#waifu:hover #waifu-tool {
+    display: block;
+    opacity: 1;
+}
+
+/* 修复移动设备上的工具栏显示问题 */
+@media (max-width: 768px) {
+    #waifu-tool {
+        right: 0;
+        opacity: 0.7; /* 在移动设备上始终保持一定透明度 */
+    }
+    
+    #waifu-tool span {
+        margin: 0 3px; /* 减少按钮间距 */
+        padding: 0 3px; /* 减少内边距 */
+        transform: scale(0.8); /* 缩小按钮尺寸 */
+    }
+}
+
+/* 确保全屏模式下工具栏位置正确 */
+body.fullscreen #waifu-tool {
+    top: 20px;
+    right: 10px;
+}

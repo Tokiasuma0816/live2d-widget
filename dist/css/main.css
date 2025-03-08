@@ -265,7 +265,7 @@ body {
     transform: scale(1.1);
 }
 
-/* 输入区域置底固定 - 修正边框圆角 */
+/* 输入区域置底固定 - 修正边框圆角和位置 */
 #input-container {
     position: fixed;
     bottom: 0;
@@ -285,7 +285,15 @@ body {
     left: 50%;
     transform: translateX(-50%);
     box-sizing: border-box;
-    border-radius: 20px 20px 0 0; /* 添加顶部圆角 */
+    border-radius: 20px; /* 修改：改为四周都有圆角 */
+    margin-bottom: 10px; /* 添加：距离底部有一定间距，显示底部圆角 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#input-container:hover,
+#input-container:focus-within {
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.06);
+    transform: translateX(-50%) translateY(-2px);
 }
 
 input {
@@ -474,6 +482,7 @@ textarea {
 @media (max-width: 768px) {
     #messages {
         padding: 15px 10px;
+        padding-bottom: 100px; /* 增加底部间距，为输入框留出空间 */
     }
     
     .message {
@@ -483,6 +492,8 @@ textarea {
     
     #input-container {
         padding: 10px;
+        bottom: 10px; /* 修改：不再紧贴底部，留出间距显示圆角 */
+        border-radius: 18px; /* 适当调小圆角 */
     }
     
     #user-input {
@@ -492,6 +503,26 @@ textarea {
     .send-btn {
         min-width: 42px;
         height: 42px;
+    }
+}
+
+/* 针对特小屏幕的进一步优化 */
+@media (max-width: 576px) {
+    #input-container {
+        bottom: 15px; /* 修改：调整底部间距 */
+        padding: 8px 12px; /* 减小内边距 */
+        border-radius: 16px; /* 更小的圆角 */
+        width: 92%; /* 控制宽度，确保两侧有间距 */
+        max-width: 92%;
+    }
+}
+
+/* 为不同设备优化Live2D位置 */
+@media (max-width: 576px) {
+    #waifu {
+        bottom: 80px !important; /* 确保看板娘不会遮挡输入框 */
+        transform: scale(0.8); /* 稍微缩小看板娘尺寸 */
+        transform-origin: bottom right;
     }
 }
 

@@ -43,6 +43,4 @@
             return typeof fallback === "function" ? fallback() : fallback;
         }
     };
-    
-    console.log("全局错误处理器已安装");
 })();

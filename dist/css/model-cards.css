@@ -1,0 +1,1058 @@
+/* 模型卡片容器 */
+.model-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 25px 0;
+  margin-bottom: 25px; /* 增加主模型卡片和下面元素的间距 */
+}
+
+/* 基本卡片样式 */
+.model-card {
+  width: 170px;
+  height: 180px;
+  border-radius: 16px;
+  padding: 20px 15px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  border: 2px solid transparent;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 1;
+}
+
+/* 卡片悬停效果 */
+.model-card:hover {
+  animation: card-hover 2s cubic-bezier(0.41, 0.01, 0.2, 1.01) infinite;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* 卡片激活/选中状态 */
+.model-card.active {
+  border-color: #9683EC;
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.8), rgba(240, 249, 255, 0.8));
+  box-shadow: 
+    0 0 0 2px rgba(150, 131, 236, 0.2), 
+    0 10px 20px rgba(150, 131, 236, 0.2);
+  transform: translateY(-3px);
+}
+
+/* 卡片图标 */
+.model-card-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 卡片图标旋转动画 */
+.model-card:hover .model-card-icon {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+
+/* 卡片标题 */
+.model-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  transition: color 0.2s;
+  color: #334155;
+}
+
+/* 卡片描述 */
+.model-card-description {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  transition: color 0.3s;
+}
+
+/* 卡片标签 */
+.model-card-tag {
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  background: #e2e8f0;
+  color: #475569;
+  display: inline-block;
+  transform: scale(0.95);
+  transition: all 0.2s;
+}
+
+/* 未选中时模型标签透明度降低 */
+.model-card:not(.active) .model-card-tag {
+  opacity: 0.7;
+}
+
+/* 标签悬停效果 */
+.model-card:hover .model-card-tag {
+  transform: scale(1);
+  background: #cbd5e1;
+}
+
+/* 选中卡片的标签 */
+.model-card.active .model-card-tag {
+  background: #9683EC;
+  color: white;
+}
+
+/* Google品牌颜色 */
+.model-card.gemini {
+  background: linear-gradient(145deg, #f8fafc, #f0f9ff);
+}
+
+.model-card.gemini.active {
+  background: linear-gradient(145deg, #f0f9ff, #e0f2fe);
+}
+
+.model-card.gemini .model-card-icon {
+  color: #4285f4;
+}
+
+/* xAI品牌颜色 */
+.model-card.grok {
+  background: linear-gradient(145deg, #f8fafc, #fafafa);
+}
+
+.model-card.grok.active {
+  background: linear-gradient(145deg, #fafafa, #f3f4f6);
+}
+
+.model-card.grok .model-card-icon {
+  color: #000000;
+}
+
+/* 光晕动画效果 */
+.model-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: transform 0.6s, opacity 0.6s;
+  pointer-events: none;
+}
+
+.model-card:hover::before {
+  opacity: 0.4;
+  transform: scale(1);
+}
+
+/* 卡片波纹点击效果 */
+.model-card-ripple {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}
+
+/* 卡片选择时的跳动动画 - 降低幅度，更平滑 */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-5px);} /* 从-10px改为-5px */
+  60% {transform: translateY(-2px);} /* 从-5px改为-2px */
+}
+
+.model-card.selecting {
+  animation: select-pulse 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* 子卡片选择动画 - 使用更柔和的效果 */
+@keyframes pulse {
+  0% {transform: scale(1);}
+  50% {transform: scale(1.01);} /* 从1.02改为1.01，减小缩放效果 */
+  100% {transform: scale(1);}
+}
+
+.model-subcard.selecting {
+  animation: pulse 0.6s cubic-bezier(0.25, 0.1, 0.25, 1); /* 加快动画时间，使用更平滑的贝塞尔曲线 */
+}
+
+/* 模型子卡片相关样式 */
+.model-specific-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+  margin-top: 20px; /* 增加子模型卡片组的顶部间距 */
+  position: relative;
+}
+
+/* 添加一个视觉提示，表明这些是子卡片 */
+.model-specific-cards::before {
+  content: '选择模型版本:';
+  display: block;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* 为子卡片容器添加标记线 */
+.model-specific-cards::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -10px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(203, 213, 225, 0.5), transparent);
+}
+
+.model-subcard {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 15px;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(50% - 5px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.model-subcard:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.model-subcard.active {
+  border-color: #9683EC;
+  background: rgba(150, 131, 236, 0.05);
+  box-shadow: 0 0 0 1px rgba(150, 131, 236, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(150, 131, 236, 0.15);
+}
+
+.model-subcard-icon {
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+  transform: scale(1);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.model-subcard:hover .model-subcard-icon {
+  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg);
+}
+
+.model-subcard-content {
+  flex-grow: 1;
+}
+
+.model-subcard-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 2px;
+}
+
+.model-subcard-description {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.model-subcard-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 10px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.model-subcard.active .model-subcard-tag {
+  background: #9683EC;
+  color: white;
+}
+
+/* 卡片波纹效果 */
+.subcard-ripple {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  z-index: 1;
+}
+
+/* 媒体查询支持小屏幕 */
+@media (max-width: 576px) {
+  .model-cards-container {
+    gap: 10px;
+  }
+  
+  .model-card {
+    width: 130px;
+    height: 150px;
+    padding: 10px;
+  }
+  
+  .model-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .model-specific-cards {
+    flex-direction: column;
+  }
+  
+  .model-subcard {
+    width: 100%;
+  }
+}
+
+/* 改进响应式布局，让卡片在手机设备上更美观 */
+@media (max-width: 576px) {
+  /* 修改卡片容器布局为单列 */
+  .model-cards-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px; /* 减少卡片间距 */
+  }
+  
+  /* 调整卡片尺寸和样式，使其在手机上填满宽度但高度更紧凑 */
+  .model-card {
+    width: 85%;
+    max-width: 280px;
+    height: auto;
+    min-height: 72px; /* 设置最小高度 */
+    padding: 12px 15px; /* 减少内边距 */
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  
+  /* 改变图标位置和大小 */
+  .model-card-icon {
+    width: 36px; /* 缩小图标 */
+    height: 36px;
+    margin-bottom: 0;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+  
+  /* 创建内容容器，文字内容集中在右侧 */
+  .model-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  /* 调整标题大小和位置 */
+  .model-card-title {
+    margin-bottom: 2px; /* 减少标题底部边距 */
+    font-size: 15px;
+  }
+  
+  /* 调整描述文字大小 */
+  .model-card-description {
+    margin-bottom: 0; /* 移除底部边距 */
+    font-size: 11px;
+    line-height: 1.2; /* 减少行高使文字更紧凑 */
+  }
+  
+  /* 调整标签位置和大小 */
+  .model-card-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  
+  /* 调整子卡片在手机上的样式 */
+  .model-subcard {
+    width: 100%;
+    padding: 10px 12px; /* 更紧凑的内边距 */
+  }
+  
+  .model-subcard-icon {
+    width: 32px; /* 缩小图标 */
+    height: 32px;
+  }
+  
+  /* 调整子卡片容器的间距 */
+  .model-specific-cards {
+    gap: 8px; /* 减少间距 */
+  }
+}
+
+/* 改进响应式布局，让卡片在手机设备上更美观 */
+@media (max-width: 576px) {
+  /* 修改卡片容器布局为单列 */
+  .model-cards-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  /* 调整卡片尺寸和样式，使其在手机上填满宽度 */
+  .model-card {
+    width: 85%;
+    max-width: 280px;
+    height: auto;
+    padding: 15px;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  
+  /* 改变图标位置和大小 */
+  .model-card-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+  
+  /* 创建内容容器，文字内容集中在右侧 */
+  .model-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  /* 调整标题大小和位置 */
+  .model-card-title {
+    margin-bottom: 3px;
+    font-size: 15px;
+  }
+  
+  /* 调整描述文字大小 */
+  .model-card-description {
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+  
+  /* 调整标签位置和大小 */
+  .model-card-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  
+  /* 调整交互提示的位置 */
+  .model-card-tip {
+    bottom: auto;
+    top: -30px;
+  }
+  
+  /* 调整子卡片在手机上的宽度 */
+  .model-subcard {
+    width: 100%;
+  }
+}
+
+/* 添加卡片悬浮动画效果 */
+@keyframes card-float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* 改进卡片光效和阴影变化 */
+.model-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.model-card:hover::after {
+  opacity: 1;
+}
+
+/* 选择卡片时的脉动效果 */
+@keyframes card-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0.6); }
+  70% { box-shadow: 0 0 0 15px rgba(150, 131, 236, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0); }
+}
+
+/* 改进子卡片悬停效果 */
+.model-subcard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.model-subcard:hover::before {
+  transform: translateX(100%);
+}
+
+/* 引入设计元素和交互提示 */
+.model-card-tip,
+.model-subcard-tip {
+  position: absolute;
+  font-size: 12px;
+  background: #334155;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.model-card:hover .model-card-tip,
+.model-subcard:hover .model-subcard-tip {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* 设置选择效果 */
+.model-selecting {
+  position: relative;
+}
+
+.model-selecting::after {
+  content: "✓";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.model-subcard.active .model-selecting::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 重新设计卡片悬停动画效果 - 更柔和的悬浮 */
+@keyframes card-hover {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+/* 移除旧的浮动动画 */
+.model-card:hover .model-card-icon {
+  transform: scale(1.1) rotate(5deg);
+  /* 移除之前的animation: card-float 3s ease infinite; */
+}
+
+/* 添加更柔和的卡片悬浮效果 */
+.model-card:hover {
+  animation: card-hover 2s cubic-bezier(0.41, 0.01, 0.2, 1.01) infinite;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* 卡片激活状态不应有动画 */
+.model-card.active:hover {
+  animation: none;
+  transform: translateY(-3px);
+}
+
+/* 卡片选择时的视觉反馈 - 更柔和的缩放效果 */
+@keyframes select-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(150, 131, 236, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(150, 131, 236, 0); }
+}
+
+.model-card.selecting {
+  animation: select-pulse 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* 卡片选择时的轻微3D转换效果 */
+@keyframes select-3d {
+  0% { transform: perspective(800px) rotateX(0) rotateY(0); }
+  25% { transform: perspective(800px) rotateX(2deg) rotateY(-2deg); }
+  50% { transform: perspective(800px) rotateX(0) rotateY(0); }
+  75% { transform: perspective(800px) rotateX(-1deg) rotateY(1deg); }
+  100% { transform: perspective(800px) rotateX(0) rotateY(0); }
+}
+
+/* 选择状态优化 */
+.model-card.active {
+  border-color: #9683EC;
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.8), rgba(240, 249, 255, 0.8));
+  box-shadow: 
+    0 0 0 2px rgba(150, 131, 236, 0.2), 
+    0 10px 20px rgba(150, 131, 236, 0.2);
+  transform: translateY(-3px);
+}
+
+/* 添加点击后的光效动画 */
+@keyframes card-glow {
+  0% { box-shadow: 0 0 5px rgba(150, 131, 236, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(150, 131, 236, 0.8), 0 0 5px rgba(150, 131, 236, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(150, 131, 236, 0.5); }
+}
+
+/* 应用新的光效动画 */
+.model-card.active.selecting {
+  animation: card-glow 2s ease-in-out infinite;
+}
+
+/* 优化模型卡片间距和布局 */
+.model-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 25px 0;
+}
+
+/* 设置模型卡片大小更统一 */
+.model-card {
+  width: 170px;
+  height: 180px;
+  border-radius: 16px;
+  padding: 20px 15px;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 改进图标样式和动画 */
+.model-card-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 图标悬停动画 */
+@keyframes icon-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1); }
+}
+
+.model-card:hover .model-card-icon {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+
+/* 更新提示样式 */
+.model-card-tip {
+  position: absolute;
+  font-size: 12px;
+  background: #334155;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.model-card:hover .model-card-tip {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* 设置弹出卡片样式 */
+.model-settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.model-settings-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.model-settings-popup {
+  position: fixed;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 10000;
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.model-settings-popup.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.model-settings-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #334155;
+  text-align: center;
+  font-weight: 600;
+}
+
+.model-settings-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.model-settings-close:hover {
+  background: #e2e8f0;
+  color: #334155;
+  transform: rotate(90deg);
+}
+
+.model-settings-content {
+  max-height: calc(80vh - 120px);
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.model-settings-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.model-settings-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.model-settings-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.model-settings-confirm {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 24px;
+  background: #9683ec;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.model-settings-confirm:hover {
+  background: #8675d8;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(150, 131, 236, 0.3);
+}
+
+/* 弹出卡片内的表单样式优化 */
+.model-settings-popup .settings-field {
+  margin-bottom: 16px;
+}
+
+.model-settings-popup input,
+.model-settings-popup textarea,
+.model-settings-popup select {
+  transition: all 0.2s;
+  border: 1px solid #e2e8f0;
+}
+
+.model-settings-popup input:focus,
+.model-settings-popup textarea:focus,
+.model-settings-popup select:focus {
+  border-color: #9683ec;
+  box-shadow: 0 0 0 2px rgba(150, 131, 236, 0.2);
+}
+
+/* 模型设置卡片入场动画 */
+@keyframes settings-popup-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.model-settings-popup.active {
+  animation: settings-popup-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 设置弹出卡片样式优化 */
+.model-settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.model-settings-overlay.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+}
+
+.model-settings-popup {
+  position: fixed;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 10000;
+  display: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.model-settings-popup.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.model-settings-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #334155;
+  text-align: center;
+  font-weight: 600;
+}
+
+.model-settings-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.model-settings-close:hover {
+  background: #e2e8f0;
+  color: #334155;
+  transform: rotate(90deg);
+}
+
+.model-settings-confirm {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 24px;
+  background: #9683ec;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 200px;
+}
+
+.model-settings-confirm:hover {
+  background: #8675d8;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(150, 131, 236, 0.3);
+}
+
+/* 弹出卡片内的表单样式优化 */
+.model-settings-popup .settings-field {
+  margin-bottom: 16px;
+}
+
+.model-settings-popup input,
+.model-settings-popup textarea,
+.model-settings-popup select {
+  transition: all 0.2s;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.model-settings-popup input:focus,
+.model-settings-popup textarea:focus,
+.model-settings-popup select:focus {
+  border-color: #9683ec;
+  box-shadow: 0 0 0 2px rgba(150, 131, 236, 0.2);
+  outline: none;
+}
+
+.model-settings-popup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.model-settings-popup label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* 确保popup版本的设置面板显示正确 */
+#gemini-settings-popup,
+#grok-settings-popup {
+  box-shadow: none !important;
+  padding: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+/* 提示样式 */
+.model-settings-popup .settings-note {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #cbd5e1;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* 确保两个模型卡片平均分布 */
+.model-cards-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 25px 0;
+}
+
+@media (max-width: 500px) {
+  .model-cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}

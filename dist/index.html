@@ -8,10 +8,13 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/model-cards.css">
     <!-- 错误处理首先加载 -->
     <script src="js/error-handler.js"></script>
+    <!-- 加载辅助脚本 -->
+    <script src="js/helpers.js"></script>
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.5/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.6/dist/autoload.js"></script>
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
     <script src="js/models.js"></script>
@@ -20,6 +23,9 @@
     <script src="js/notion-debug.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/browser-fixes.js"></script> <!-- 新增修复脚本 -->
+    <script src="js/model-cards.js"></script>
+    <!-- 新增: Live2D修复脚本 -->
+    <script src="js/live2d-fixes.js"></script>
     <!-- 不需要额外的看板娘退出效果脚本 -->
 </head>
 <body>
@@ -83,10 +89,12 @@
                 <div class="settings-content" id="models-section">
                     <div class="settings-field">
                         <label for="model-select">选择模型</label>
+                        <!-- 原下拉框保留，用于保存状态，但会被JS隐藏 -->
                         <select id="model-select" onchange="changeModelSettings()">
                             <option value="gemini">Google Gemini</option>
                             <option value="grok">xAI Grok</option>
                         </select>
+                        <!-- 卡片区域将通过JS动态插入到这里 -->
                     </div>
                     
                     <!-- Gemini API设置 -->
@@ -94,6 +102,18 @@
                         <div class="settings-field">
                             <label for="gemini-api-key">Gemini API Key</label>
                             <input type="text" id="gemini-api-key" placeholder="输入你的 Gemini API Key">
+                        </div>
+                        <div class="settings-field">
+                            <label for="gemini-model">Gemini 模型</label>
+                            <select id="gemini-model">
+                                <option value="gemini-pro">Gemini Pro</option>
+                                <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (推荐)</option>
+                                <option value="gemini-1.0-pro">Gemini 1.0 Pro</option>
+                                <option value="gemini-1.0-pro-vision">Gemini 1.0 Pro Vision</option>
+                                <option value="gemini-1.0-pro-latest">Gemini 1.0 Pro Latest</option>
+                            </select>
                         </div>
                         <div class="settings-field">
                             <label for="gemini-proxy-url">Gemini 代理地址</label>
@@ -105,7 +125,7 @@
                         </div>
                     </div>
                     
-                    <!-- Grok API设置 -->
+                    <!-- Grok API设置 - 确保ID为grok-settings -->
                     <div class="model-settings" id="grok-settings" style="display: none;">
                         <div class="settings-field">
                             <label for="grok-api-key">Grok API Key</label>
@@ -114,10 +134,8 @@
                         <div class="settings-field">
                             <label for="grok-model">Grok 模型</label>
                             <select id="grok-model">
-                                <option value="grok-1">Grok-1</option>
-                                <option value="grok-1-mini">Grok-1-mini</option>
-                                <option value="grok-2">Grok-2 (最新)</option>
-                                <option value="grok-2-mini">Grok-2-mini</option>
+                                <option value="grok-2" selected>Grok-2 (标准模型)</option>
+                                <option value="grok-2-vision">Grok-2-Vision (图像支持)</option>
                             </select>
                         </div>
                         <div class="settings-field">

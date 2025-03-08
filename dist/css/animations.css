@@ -546,3 +546,108 @@
     pointer-events: none;
     z-index: 10000;
 }
+
+/* 添加卡片波纹效果的CSS更新 */
+@keyframes ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(var(--scale-multiplier, 20));
+    opacity: 0;
+  }
+}
+
+.model-card-ripple {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple-expand 0.8s ease-out forwards;
+  z-index: 0;
+}
+
+.model-card-ripple.emphasize {
+  background: rgba(255,255,255,0.9);
+  animation-duration: 0.5s;
+}
+
+/* 添加卡片选择时的动画 */
+@keyframes select-glow {
+  0% { box-shadow: 0 0 0 rgba(150, 131, 236, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(150, 131, 236, 0.8); }
+  100% { box-shadow: 0 0 0 rgba(150, 131, 236, 0.5); }
+}
+
+.selecting {
+  animation: select-glow 1.5s infinite;
+}
+
+/* 交互提示动画 */
+@keyframes tip-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.card-tip {
+  animation: tip-float 2s ease-in-out infinite;
+}
+
+/* 子卡片特殊效果 */
+@keyframes pulse-border {
+  0% { border-color: #e2e8f0; }
+  50% { border-color: rgba(150, 131, 236, 0.7); }
+  100% { border-color: #e2e8f0; }
+}
+
+.model-subcard.pulsing {
+  animation: pulse-border 1.5s infinite;
+}
+
+/* 推送通知的动画 */
+@keyframes notification-enter {
+  0% { 
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes notification-exit {
+  0% { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.push-notification.enter {
+  animation: notification-enter 0.3s forwards;
+}
+
+.push-notification.exit {
+  animation: notification-exit 0.3s forwards;
+}
+
+/* 模型图标旋转效果 */
+@keyframes icon-rotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  75% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.model-card:hover .model-card-icon,
+.model-subcard:hover .model-subcard-icon {
+  animation: icon-rotate 0.8s ease;
+}

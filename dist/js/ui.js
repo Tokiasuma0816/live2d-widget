@@ -18,6 +18,7 @@ function toggleChat() {
         setTimeout(() => chatContainer.classList.add("active"), 10);
         currentPanel = "chat";
     }
+    setTimeout(adjustInputPosition, 100);
 }
 
 // 切换配置面板
@@ -148,6 +149,74 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, 500);
 });
+
+// 添加输入框位置调整功能
+function adjustInputPosition() {
+  const inputContainer = document.getElementById('input-container');
+  const waifu = document.getElementById('waifu');
+  
+  if (!inputContainer) return;
+  
+  // 检测屏幕尺寸
+  const isMobile = window.innerWidth <= 768;
+  const isSmallScreen = window.innerWidth <= 576;
+  
+  // 根据屏幕大小调整位置
+  if (isSmallScreen) {
+    inputContainer.style.bottom = '15px'; // 修改：增加底部间距以显示圆角
+    
+    // 同时调整messages容器的内边距，确保滚动时能看到所有内容
+    const messagesContainer = document.getElementById('messages');
+    if (messagesContainer) {
+      messagesContainer.style.paddingBottom = '130px';
+    }
+    
+    // 调整看板娘位置
+    if (waifu) {
+      waifu.style.bottom = '80px'; // 修改：调整看板娘位置
+      waifu.style.transform = 'scale(0.8)';
+      waifu.style.transformOrigin = 'bottom right';
+    }
+  } else if (isMobile) {
+    inputContainer.style.bottom = '10px'; // 修改：增加底部间距
+    
+    const messagesContainer = document.getElementById('messages');
+    if (messagesContainer) {
+      messagesContainer.style.paddingBottom = '100px';
+    }
+    
+    // 还原看板娘样式，但保持位置
+    if (waifu) {
+      waifu.style.bottom = '70px';
+      waifu.style.transform = '';
+    }
+  } else {
+    // 桌面布局
+    inputContainer.style.bottom = '10px'; // 修改：增加底部间距
+    
+    const messagesContainer = document.getElementById('messages');
+    if (messagesContainer) {
+      messagesContainer.style.paddingBottom = '80px';
+    }
+    
+    // 桌面布局还原看板娘位置
+    if (waifu) {
+      waifu.style.bottom = '0';
+      waifu.style.transform = '';
+    }
+  }
+}
+
+// 在窗口调整大小和页面加载时调整位置
+window.addEventListener('resize', debounce(adjustInputPosition, 250));
+window.addEventListener('load', adjustInputPosition);
+
+// 确保在聊天打开时调整位置
+const originalToggleChat = window.toggleChat;
+window.toggleChat = function() {
+  originalToggleChat();
+  setTimeout(adjustInputPosition, 100);
+};
 
 // 导出全局函数
 window.toggleChat = toggleChat;
