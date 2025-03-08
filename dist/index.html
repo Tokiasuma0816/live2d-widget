@@ -10,13 +10,29 @@
     <link rel="stylesheet" href="css/settings.css">
     <link rel="stylesheet" href="css/model-cards.css">
     <link rel="stylesheet" href="waifu.css">
+    <link rel="stylesheet" href="css/message-content.css">
     <!-- 错误处理首先加载 -->
     <script src="js/error-handler.js"></script>
     <!-- 加载辅助脚本 -->
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.8/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.9/dist/autoload.js"></script>
+    <!-- 添加MathJax支持 -->
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
     <script src="js/models.js"></script>

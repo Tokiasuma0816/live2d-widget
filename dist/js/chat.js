@@ -9,69 +9,345 @@ async function sendMessage() {
     // 创建消息元素但不立即应用完整样式
     const aiMessageDiv = document.createElement("div");
     aiMessageDiv.classList.add("message", "ai-message");
+    
+    // 添加打字指示器
+    const typingIndicator = document.createElement("div");
+    typingIndicator.className = "typing-indicator";
+    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+    aiMessageDiv.appendChild(typingIndicator);
+    
     document.getElementById("messages").appendChild(aiMessageDiv);
+    scrollToBottom();
     
     showLive2DMessage("嗯~ o(*￣▽￣*)o...");
     
     try {
-        // 使用模型API发送消息
-        if (window.AI && window.AI.sendStreamMessage) {
-            // 使用流式API (如果可用)
-            const result = await window.AI.sendStreamMessage(userInput, (chunk, accumulated) => {
-                aiMessageDiv.textContent = accumulated;
-                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
-            });
-            
-            if (!result.success) {
-                throw new Error(result.message);
-            }
-            
-            // 完成处理AI消息
-            finalizeAiMessage(aiMessageDiv, result.message);
-        } else {
-            // 回退到普通API
-            const result = await window.AI.sendMessage(userInput);
-            if (!result.success) {
-                throw new Error(result.message);
-            }
-            
-            // 完成处理AI消息
-            finalizeAiMessage(aiMessageDiv, result.message);
+        // 始终使用流式API处理回答
+        const result = await streamAIResponse(userInput, aiMessageDiv);
+        
+        if (!result.success) {
+            throw new Error(result.message);
         }
-
+        
         // 如果 Notion 脚本已启用，调用同步功能
         if (window.notionEnabled) {
-            syncToNotion(`Q: ${userInput}\n\nA: ${aiMessageDiv.textContent}`);
+            syncToNotion(`Q: ${userInput}\n\nA: ${aiMessageDiv.querySelector('.message-content').textContent}`);
         }
     } catch (error) {
         console.error("请求失败：", error);
         const errorMessage = error.message || "请求失败，请检查网络或API设置。";
         showLive2DMessage(errorMessage);
         
-        // 即使是错误消息，也添加删除按钮
-        finalizeAiMessage(aiMessageDiv, errorMessage);
+        // 移除打字指示器
+        const typingIndicator = aiMessageDiv.querySelector('.typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+        
+        // 创建错误消息内容
+        const messageContent = document.createElement("div");
+        messageContent.className = "message-content";
+        messageContent.innerHTML = formatErrorMessage(errorMessage);
+        
+        // 添加时间戳
+        const timestamp = document.createElement("div");
+        timestamp.className = "message-timestamp";
+        const now = new Date();
+        timestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        messageContent.appendChild(timestamp);
+        
+        aiMessageDiv.innerHTML = '';
+        aiMessageDiv.appendChild(messageContent);
+        
+        // 添加删除按钮
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "message-delete-btn";
+        deleteBtn.innerHTML = "×";
+        deleteBtn.title = "删除消息";
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteMessage(aiMessageDiv);
+        };
+        aiMessageDiv.appendChild(deleteBtn);
+        
+        scrollToBottom();
     }
+}
+
+/**
+ * 统一处理流式AI响应
+ * @param {string} userInput 用户输入
+ * @param {HTMLElement} messageDiv 消息DIV元素
+ * @returns {Promise<Object>} 响应结果
+ */
+async function streamAIResponse(userInput, messageDiv) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let accumulatedText = "";
+            
+            // 使用AI流式接口，如果不支持会回退到普通API
+            if (window.AI && window.AI.sendStreamMessage) {
+                const result = await window.AI.sendStreamMessage(userInput, (chunk, accumulated) => {
+                    accumulatedText = accumulated;
+                    updateMessageWithStreamContent(messageDiv, accumulated);
+                    scrollToBottom();
+                });
+                
+                if (!result.success) {
+                    reject(new Error(result.message));
+                    return;
+                }
+                
+                // 完成流式响应，格式化最终内容
+                finalizeAiMessage(messageDiv, accumulatedText);
+                resolve(result);
+            } else {
+                // 回退到普通API，但模拟流式效果
+                const result = await window.AI.sendMessage(userInput);
+                
+                if (!result.success) {
+                    reject(new Error(result.message));
+                    return;
+                }
+                
+                // 模拟流式输出
+                const text = result.message;
+                let currentIndex = 0;
+                
+                // 移除打字指示器
+                const typingIndicator = messageDiv.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+                
+                // 创建消息内容元素
+                const messageContent = document.createElement("div");
+                messageContent.className = "message-content";
+                messageDiv.appendChild(messageContent);
+                
+                // 模拟流式打字效果
+                const simulateTyping = () => {
+                    if (currentIndex < text.length) {
+                        // 每次添加1-3个字符，模拟不同打字速度
+                        const chunkSize = Math.floor(Math.random() * 3) + 1;
+                        const end = Math.min(currentIndex + chunkSize, text.length);
+                        const chunk = text.substring(currentIndex, end);
+                        accumulatedText += chunk;
+                        
+                        // 更新显示内容
+                        updateMessageWithContent(messageContent, accumulatedText);
+                        scrollToBottom();
+                        
+                        // 继续模拟
+                        currentIndex = end;
+                        setTimeout(simulateTyping, Math.floor(Math.random() * 30) + 10);
+                    } else {
+                        // 模拟完成，添加最终格式化
+                        finalizeAiMessage(messageDiv, accumulatedText);
+                        resolve(result);
+                    }
+                };
+                
+                // 开始模拟打字
+                simulateTyping();
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+/**
+ * 使用流式内容更新消息
+ * @param {HTMLElement} messageDiv 消息容器
+ * @param {string} text 累积的文本内容
+ */
+function updateMessageWithStreamContent(messageDiv, text) {
+    // 如果还有打字指示器，移除它
+    const typingIndicator = messageDiv.querySelector('.typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+    
+    // 查找或创建消息内容元素
+    let messageContent = messageDiv.querySelector('.message-content');
+    if (!messageContent) {
+        messageContent = document.createElement("div");
+        messageContent.className = "message-content";
+        messageDiv.appendChild(messageContent);
+    }
+    
+    // 更新消息内容
+    updateMessageWithContent(messageContent, text);
+}
+
+/**
+ * 更新消息内容元素，支持更丰富的格式
+ * @param {HTMLElement} contentElement 内容元素
+ * @param {string} text 文本内容
+ */
+function updateMessageWithContent(contentElement, text) {
+    // 处理数学公式：$inline math$ 和 $$block math$$
+    let formattedText = text
+        // 块级数学公式: $$...$$
+        .replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-block">$$$1$$</div>')
+        // 行内数学公式: $...$
+        .replace(/\$([^\$]*?)\$/g, '<span class="math-inline">\\($1\\)</span>');
+    
+    // 处理标题格式 (# H1, ## H2, ### H3)
+    formattedText = formattedText
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
+        .replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+    
+    // 处理引用块 (> quote)
+    formattedText = formattedText.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    
+    // 处理代码块 (```code```)
+    formattedText = formattedText.replace(/```([\s\S]*?)```/g, function(match, code) {
+        // 提取语言信息
+        const firstLine = code.trim().split('\n')[0];
+        let language = '';
+        let codeContent = code;
+        
+        // 判断第一行是否为语言标识
+        if (firstLine && !firstLine.includes(' ') && firstLine.length < 20) {
+            language = firstLine;
+            codeContent = code.substring(firstLine.length).trim();
+        }
+        
+        return `<pre><code class="language-${language}">${codeContent}</code></pre>`;
+    });
+    
+    // 处理行内代码 (`code`)
+    formattedText = formattedText.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // 处理强调格式 (粗体、斜体)
+    formattedText = formattedText
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<em>$1</em>');
+    
+    // 处理有序列表
+    formattedText = formattedText.replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n)+/g, '<ol>$&</ol>');
+    
+    // 处理无序列表
+    formattedText = formattedText.replace(/^[\*\-\+]\s+(.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n)+/g, '<ul>$&</ul>');
+    
+    // 处理水平分割线
+    formattedText = formattedText.replace(/^\-{3,}$|^\*{3,}$|^_{3,}$/gm, '<hr>');
+    
+    // 处理链接 [text](url)
+    formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    
+    // 处理图片 ![alt](url)
+    formattedText = formattedText.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="message-image">');
+    
+    // 处理表格 (基础支持)
+    if (formattedText.includes('|')) {
+        const lines = formattedText.split('\n');
+        let inTable = false;
+        let tableHTML = '<table>';
+        let isHeader = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            if (line.startsWith('|') && line.endsWith('|')) {
+                if (!inTable) {
+                    inTable = true;
+                    isHeader = true;
+                }
+                
+                // 分割单元格
+                const cells = line.split('|').filter(cell => cell.trim() !== '');
+                
+                if (isHeader) {
+                    tableHTML += '<thead><tr>';
+                    cells.forEach(cell => {
+                        tableHTML += `<th>${cell.trim()}</th>`;
+                    });
+                    tableHTML += '</tr></thead>';
+                    tableHTML += '<tbody>';
+                    isHeader = false;
+                } else if (line.includes('---')) {
+                    // 这是分隔行，跳过
+                    continue;
+                } else {
+                    tableHTML += '<tr>';
+                    cells.forEach(cell => {
+                        tableHTML += `<td>${cell.trim()}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                }
+            } else if (inTable) {
+                // 表格结束
+                tableHTML += '</tbody></table>';
+                lines[i] = tableHTML;
+                inTable = false;
+            }
+        }
+        
+        if (inTable) {
+            tableHTML += '</tbody></table>';
+            lines.push(tableHTML);
+        }
+        
+        formattedText = lines.join('\n');
+    }
+    
+    // 替换换行符为HTML换行标签
+    formattedText = formattedText.replace(/\n/g, '<br>');
+    
+    // 更新内容
+    contentElement.innerHTML = formattedText;
+    
+    // 处理数学公式渲染 (如果页面已加载MathJax)
+    if (window.MathJax) {
+        try {
+            MathJax.typesetPromise([contentElement]).catch(err => console.log('MathJax error:', err));
+        } catch (e) {
+            console.error('MathJax rendering failed:', e);
+        }
+    }
+}
+
+/**
+ * 格式化错误消息
+ * @param {string} message 错误消息文本
+ * @returns {string} 格式化后的HTML
+ */
+function formatErrorMessage(message) {
+    return `<span style="color: #e53e3e;">错误: ${message}</span>`;
 }
 
 // 新增函数：完成AI消息的显示，添加删除按钮
 function finalizeAiMessage(messageDiv, text) {
-    // 清空原有内容，重新构建消息结构
-    messageDiv.innerHTML = '';
+    // 移除打字指示器
+    const typingIndicator = messageDiv.querySelector('.typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
     
-    // 创建消息内容容器
-    const messageContent = document.createElement("div");
-    messageContent.className = "message-content";
+    // 获取消息内容元素
+    let messageContent = messageDiv.querySelector('.message-content');
     
-    // 处理消息文本，支持简单的Markdown格式
-    let formattedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/`(.*?)`/g, '<code>$1</code>');
+    // 如果没有消息内容元素（不应该发生），则创建一个
+    if (!messageContent) {
+        messageContent = document.createElement("div");
+        messageContent.className = "message-content";
         
-    // 处理换行
-    formattedText = formattedText.replace(/\n/g, '<br>');
-    
-    messageContent.innerHTML = formattedText;
+        // 处理消息文本，支持简单的Markdown格式
+        updateMessageWithContent(messageContent, text);
+        
+        messageDiv.appendChild(messageContent);
+    }
     
     // 添加时间戳
     const timestamp = document.createElement("div");
@@ -90,8 +366,7 @@ function finalizeAiMessage(messageDiv, text) {
         deleteMessage(messageDiv);
     };
     
-    // 组合元素
-    messageDiv.appendChild(messageContent);
+    // 添加删除按钮到消息
     messageDiv.appendChild(deleteBtn);
     
     // 滚动到底部

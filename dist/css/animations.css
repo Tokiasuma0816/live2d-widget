@@ -365,6 +365,45 @@
     animation: typing-dots 0.8s infinite 0.4s;
 }
 
+/* 打字指示器动画 */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 5px 0;
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.8);
+    margin: 0 3px;
+    animation: typing-dot 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing-dot {
+    0%, 60%, 100% { 
+        transform: translateY(0); 
+    }
+    30% { 
+        transform: translateY(-4px); 
+    }
+}
+
 /* 删除按钮样式改进 - 同时适用于用户和AI消息 */
 .message .message-delete-btn {
     position: absolute;

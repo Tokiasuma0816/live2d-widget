@@ -1,0 +1,182 @@
+/* 消息内容样式表 - 增强显示效果 */
+
+/* 消息基础样式 */
+.message-content {
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 标题样式 */
+.message-content h1 {
+  font-size: 1.8em;
+  margin: 0.8em 0 0.5em;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 0.3em;
+}
+
+.message-content h2 {
+  font-size: 1.5em;
+  margin: 0.7em 0 0.5em;
+}
+
+.message-content h3 {
+  font-size: 1.3em;
+  margin: 0.6em 0 0.4em;
+}
+
+.message-content h4 {
+  font-size: 1.2em;
+  margin: 0.5em 0 0.4em;
+}
+
+.message-content h5 {
+  font-size: 1.1em;
+  margin: 0.4em 0 0.3em;
+}
+
+.message-content h6 {
+  font-size: 1em;
+  margin: 0.4em 0 0.3em;
+}
+
+/* 代码样式 */
+.message-content pre {
+  background: rgba(0,0,0,0.2);
+  padding: 0.8em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.7em 0;
+}
+
+.message-content code {
+  background: rgba(0,0,0,0.15);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.message-content pre code {
+  background: transparent;
+  padding: 0;
+  white-space: pre;
+  line-height: 1.4;
+  display: block;
+}
+
+/* 数学公式样式 */
+.math-inline {
+  padding: 0.1em 0.2em;
+  background: rgba(0,0,0,0.05);
+  border-radius: 3px;
+}
+
+.math-block {
+  margin: 0.8em 0;
+  padding: 0.7em;
+  background: rgba(0,0,0,0.1);
+  border-radius: 5px;
+  overflow-x: auto;
+  text-align: center;
+}
+
+/* 列表样式 */
+.message-content ul, .message-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.message-content ul {
+  list-style-type: disc;
+}
+
+.message-content ol {
+  list-style-type: decimal;
+}
+
+.message-content li {
+  margin: 0.3em 0;
+}
+
+/* 引用块样式 */
+.message-content blockquote {
+  border-left: 3px solid rgba(255,255,255,0.3);
+  padding-left: 0.8em;
+  margin: 0.8em 0;
+  color: rgba(255,255,255,0.9);
+  font-style: italic;
+}
+
+/* 表格样式 */
+.message-content table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: 100%;
+}
+
+.message-content th, .message-content td {
+  padding: 0.5em;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.message-content th {
+  background: rgba(0,0,0,0.1);
+  font-weight: bold;
+}
+
+.message-content tr:nth-child(even) {
+  background: rgba(0,0,0,0.05);
+}
+
+/* 图片样式 */
+.message-content .message-image {
+  max-width: 100%;
+  margin: 0.8em 0;
+  border-radius: 4px;
+}
+
+/* 链接样式 */
+.message-content a {
+  color: #6ab0ff;
+  text-decoration: none;
+  border-bottom: 1px dotted;
+  transition: color 0.2s;
+}
+
+.message-content a:hover {
+  color: #8ec3ff;
+}
+
+/* 水平分割线 */
+.message-content hr {
+  border: none;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 1em 0;
+}
+
+/* 适应不同消息背景色的样式调整 */
+.user-message .message-content blockquote {
+  border-left-color: rgba(255,255,255,0.4);
+}
+
+.ai-message .message-content blockquote {
+  border-left-color: rgba(255,255,255,0.4);
+}
+
+/* 加载中动画 */
+.message-content .code-loading {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
