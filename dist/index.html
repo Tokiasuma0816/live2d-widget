@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini AI Chat</title>
+    <title>OiviO AI Chat</title>
     <!-- 加载样式表 -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -17,13 +17,13 @@
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.5/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.6/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
       tex: {
         inlineMath: [['\\(', '\\)']],
-        displayMath: [['$$', '$$']],
+        displayMath: [['$$', '$$']], 
         processEscapes: true,
         processEnvironments: true
       },
@@ -61,7 +61,7 @@
     <!-- 导航栏 -->
     <div class="nav-container">
         <div class="nav-brand" onclick="toggleDropdownHint()">
-            Gemini AI Assistant
+            OiviO AI Assistant
             <div class="dropdown-hint">
                 新功能即将到来~٩(˃̶͈̀௰˂̶͈́)و
             </div>
@@ -69,6 +69,7 @@
         <div class="nav-items">
             <button class="nav-button" onclick="toggleChat()">对话</button>
             <button class="nav-button" onclick="toggleConfig()">设置</button>
+            <button class="nav-button" onclick="toggleAbout()">关于</button>
         </div>
     </div>
 
@@ -265,6 +266,25 @@
         </div>
     </div>
 
+    <!-- 关于页面容器 -->
+    <div id="about-container" style="display: none;">
+        <div class="about-content">
+            <div class="about-header">
+                <h2>关于 OiviO AI Assistant</h2>
+                <button class="close-btn" onclick="toggleAbout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="about-body" id="about-content-container">
+                <!-- 内容将通过JavaScript动态加载 -->
+                <div class="about-loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- 初始化脚本，确保DOM加载后执行 -->
     <!-- 修改初始化脚本部分 -->
 <script>
@@ -308,5 +328,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js" defer></script>
+    <link rel="stylesheet" href="css/about.css">
+    <script src="js/about.js"></script>
 </body>
 </html>
