@@ -255,3 +255,71 @@
         }
     }
 })();
+
+// 移动设备输入框优化
+document.addEventListener('DOMContentLoaded', function() {
+    // 检测是否为移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        const inputElement = document.getElementById('user-input');
+        const inputContainer = document.getElementById('input-container');
+        const messagesContainer = document.getElementById('messages');
+        
+        if (inputElement && inputContainer) {
+            // 处理输入框聚焦事件
+            inputElement.addEventListener('focus', function() {
+                // 滚动到页面底部，确保输入框在视图中
+                setTimeout(() => {
+                    window.scrollTo(0, document.body.scrollHeight);
+                    
+                    // 临时增加输入框的底部间距，防止被虚拟键盘遮挡
+                    if (inputContainer) {
+                        inputContainer.style.bottom = '50px'; // 临时增加底部间距
+                        
+                        // iOS特定处理
+                        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                            inputContainer.style.bottom = '70px'; // iOS需要更多空间
+                        }
+                    }
+                    
+                    // 确保消息列表底部有足够空间
+                    if (messagesContainer) {
+                        messagesContainer.style.paddingBottom = '200px';
+                    }
+                }, 300);
+            });
+            
+            // 处理输入框失去焦点事件
+            inputElement.addEventListener('blur', function() {
+                // 恢复原来的样式
+                setTimeout(() => {
+                    if (inputContainer) {
+                        if (window.innerWidth <= 576) {
+                            inputContainer.style.bottom = '30px'; // 恢复小屏幕设置
+                        } else {
+                            inputContainer.style.bottom = '10px'; // 恢复中等屏幕设置
+                        }
+                    }
+                    
+                    // 恢复消息列表的底部间距
+                    if (messagesContainer) {
+                        if (window.innerWidth <= 576) {
+                            messagesContainer.style.paddingBottom = '180px';
+                        } else {
+                            messagesContainer.style.paddingBottom = '100px';
+                        }
+                    }
+                }, 100);
+            });
+        }
+        
+        // 调整发送按钮的行为，确保关闭键盘
+        const sendButton = document.querySelector('.send-btn');
+        if (sendButton && inputElement) {
+            sendButton.addEventListener('click', function() {
+                inputElement.blur(); // 点击发送后关闭键盘
+            });
+        }
+    }
+});
