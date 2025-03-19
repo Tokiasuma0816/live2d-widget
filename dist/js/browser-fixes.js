@@ -275,17 +275,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // 临时增加输入框的底部间距，防止被虚拟键盘遮挡
                     if (inputContainer) {
-                        inputContainer.style.bottom = '50px'; // 临时增加底部间距
+                        inputContainer.style.bottom = '80px'; // 进一步增加底部间距
                         
                         // iOS特定处理
                         if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                            inputContainer.style.bottom = '70px'; // iOS需要更多空间
+                            inputContainer.style.bottom = '100px'; // iOS需要更多空间
                         }
                     }
                     
                     // 确保消息列表底部有足够空间
                     if (messagesContainer) {
-                        messagesContainer.style.paddingBottom = '200px';
+                        messagesContainer.style.paddingBottom = '250px';
                     }
                 }, 300);
             });
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     if (inputContainer) {
                         if (window.innerWidth <= 576) {
-                            inputContainer.style.bottom = '30px'; // 恢复小屏幕设置
+                            inputContainer.style.bottom = '60px'; // 恢复小屏幕设置
                         } else {
                             inputContainer.style.bottom = '10px'; // 恢复中等屏幕设置
                         }
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 恢复消息列表的底部间距
                     if (messagesContainer) {
                         if (window.innerWidth <= 576) {
-                            messagesContainer.style.paddingBottom = '180px';
+                            messagesContainer.style.paddingBottom = '220px';
                         } else {
                             messagesContainer.style.paddingBottom = '100px';
                         }

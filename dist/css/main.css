@@ -509,7 +509,7 @@ textarea {
 /* 针对特小屏幕的进一步优化 */
 @media (max-width: 576px) {
     #input-container {
-        bottom: 30px; /* 调整：增加距离底部的间距，防止被遮挡 */
+        bottom: 60px; /* 调整：大幅增加距离底部的间距，防止被遮挡 */
         padding: 8px 12px;
         border-radius: 16px;
         width: 94%; /* 略微增加宽度让输入框更容易看到 */
@@ -519,14 +519,14 @@ textarea {
     }
     
     #messages {
-        padding-bottom: 180px; /* 增加底部内边距，确保内容不被输入框遮挡 */
+        padding-bottom: 220px; /* 增加底部内边距，确保内容不被输入框遮挡 */
     }
     
     /* 添加iOS底部安全区域适配 */
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
         #input-container {
             padding-bottom: calc(8px + env(safe-area-inset-bottom));
-            bottom: env(safe-area-inset-bottom);
+            bottom: calc(60px + env(safe-area-inset-bottom)); /* 同时考虑安全区域 */
         }
     }
     
@@ -540,7 +540,7 @@ textarea {
 @media (max-width: 576px) {
   #waifu {
     /* 不要隐藏看板娘，只调整位置 */
-    bottom: 180px !important; /* 提高位置，确保不挡住输入框 */
+    bottom: 220px !important; /* 提高位置，确保不挡住输入框 */
     right: 0 !important;
     transform: scale(0.8); /* 稍微缩小看板娘尺寸 */
     transform-origin: bottom right;
