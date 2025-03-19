@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.6/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.7/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -453,7 +453,7 @@ if (screen.width >= 768) {
 // 检测全局对象并纠错
 if (typeof live2d_path === "undefined") {
     // 添加自动纠错功能，确保全局变量存在
-    window.live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.6.5/";
+    window.live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.7.7/";
 }
 
 // 添加重试机制和加载状态跟踪
