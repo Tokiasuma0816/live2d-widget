@@ -509,30 +509,28 @@ textarea {
 /* 针对特小屏幕的进一步优化 */
 @media (max-width: 576px) {
     #input-container {
-        bottom: 60px; /* 调整：大幅增加距离底部的间距，防止被遮挡 */
+        /* 移除固定底部距离，交由JS动态设置 */
+        /* bottom: 60px; */
+        bottom: 20px; /* 提供默认值，JS会覆盖 */
         padding: 8px 12px;
         border-radius: 16px;
         width: 94%; /* 略微增加宽度让输入框更容易看到 */
         max-width: 94%;
         z-index: 1050; /* 确保输入框在看板娘之上 */
-        margin-bottom: 20px; /* 增加底部外边距 */
+        margin-bottom: 0; /* 移除额外边距，让JS完全控制定位 */
     }
     
     #messages {
-        padding-bottom: 220px; /* 增加底部内边距，确保内容不被输入框遮挡 */
+        /* 默认底部内边距，JS会动态调整确保内容不被挡住 */
+        padding-bottom: 180px;
     }
     
-    /* 添加iOS底部安全区域适配 */
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-        #input-container {
-            padding-bottom: calc(8px + env(safe-area-inset-bottom));
-            bottom: calc(60px + env(safe-area-inset-bottom)); /* 同时考虑安全区域 */
-        }
-    }
-    
-    /* 修复iPhone Safari底部工具栏问题 */
+    /* 修复iOS Safari底部工具栏问题 */
     body {
-        padding-bottom: env(safe-area-inset-bottom);
+        min-height: 100vh; /* 确保内容区域铺满整个视口 */
+        height: 100%; /* 确保高度计算正确 */
+        /* 根据安全区域自动增加底部填充 */
+        padding-bottom: env(safe-area-inset-bottom, 0);
     }
 }
 
