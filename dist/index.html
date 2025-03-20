@@ -17,7 +17,7 @@
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.2/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.3/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
@@ -89,8 +89,6 @@
         <div id="messages">
             <!-- 消息将在此显示，用户和AI消息都可以通过hover时显示的删除按钮删除 -->
         </div>
-        <!-- 添加底部背景层 -->
-        <div class="input-background-layer"></div>
         <div id="input-container">
             <input type="text" id="user-input" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()" title="发送">

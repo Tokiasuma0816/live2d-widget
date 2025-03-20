@@ -290,20 +290,6 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 添加底部背景装饰层 */
-.input-background-layer {
-    position: absolute;
-    bottom: 0;
-    width: calc(100% - 1rem);
-    height: 100%;
-    background-color: var(--background-color, #ffffff);
-    border-radius: 40px 40px 0 0;
-    z-index: 50;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
-}
-
 #input-container:hover,
 #input-container:focus-within {
     box-shadow: 0 -2px 15px rgba(0,0,0,0.06);
@@ -530,13 +516,6 @@ textarea {
         max-width: 94%;
         z-index: 1050; /* 确保输入框在看板娘之上 */
         margin-bottom: 20px; /* 增加底部外边距 */
-    }
-    
-    /* 移动设备底部背景层调整 */
-    .input-background-layer {
-        height: 180px; /* 较小设备上增加高度 */
-        width: 100%;
-        border-radius: 30px 30px 0 0;
     }
     
     #messages {
