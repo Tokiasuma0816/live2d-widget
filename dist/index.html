@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OiviO AI Chat</title>
     <!-- 加载样式表 -->
     <link rel="stylesheet" href="css/main.css">
@@ -11,14 +11,13 @@
     <link rel="stylesheet" href="css/model-cards.css">
     <link rel="stylesheet" href="waifu.css">
     <link rel="stylesheet" href="css/message-content.css">
-    <!-- 修改：确保移动端修复脚本优先级更高 -->
-    <script src="js/mobile-input-fix.js"></script> <!-- 新增移动端输入框专用修复（提前加载） -->
+    <!-- 错误处理首先加载 -->
     <script src="js/error-handler.js"></script>
     <!-- 加载辅助脚本 -->
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.4/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.5/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
@@ -42,6 +41,7 @@
     <script src="js/notion-debug.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/browser-fixes.js"></script> <!-- 基本修复脚本 -->
+    <script src="js/mobile-input-fix.js"></script> <!-- 新增移动端输入框专用修复 -->
     <script src="js/model-cards.js"></script>
     
     <!-- KaTeX - 数学公式支持 -->
