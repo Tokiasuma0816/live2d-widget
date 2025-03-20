@@ -428,7 +428,7 @@ textarea {
     left: 0;
     right: 0;
     bottom: 0;
-    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
     width: 100%;
     background: rgba(249, 250, 252, 0.95);
     padding: 20px;
