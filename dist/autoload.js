@@ -1,5 +1,5 @@
 // live2d_path 参数建议使用绝对路径
-const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.0/dist/";
+const live2d_path = "https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.1/dist/";
 
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {
@@ -366,7 +366,7 @@ if (screen.width >= 768) {
                 initWidget({
                     waifuPath: live2d_path + "waifu-tips.json",
                     cdnPath: "https://fastly.jsdelivr.net/gh/oivio-up/live2d_api@v1.0.8/",
-                    tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "settings", "quit"]
+                    tools: ["asteroids", "switch-model", "switch-texture", "info", "settings", "quit"]
                 });
 
                 // 延迟初始化，确保DOM已经完全加载
