@@ -5,7 +5,7 @@
 
 // 关于页面数据（此处可以替换为API获取或其他数据源）
 const aboutData = {
-    version: "1.0.0",
+    version: "1.0.1",
     description: "OiviO AI Assistant 是一个作者用于自用写着玩的web ui。",
     
     // API代理信息

@@ -3,8 +3,14 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
+}
+
+@supports not (height: 100dvh) {
+    body {
+        height: 100vh;
+    }
 }
 
 /* 导航栏样式 */
@@ -63,7 +69,7 @@ body {
     right: 0;
     bottom: 0;
     width: 100%;
-    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
     background: #f9fafc;
     padding: 0;
     border-radius: 0;
@@ -72,6 +78,16 @@ body {
     flex-direction: column;
     overflow: hidden;
     margin: 0 auto; /* 水平居中 */
+}
+
+@supports not (height: 100dvh) {
+    #chat-container {
+        /*
+         * 回退到原有的 100vh 方案
+         * 若有需要可做额外针对性调整
+         */
+        height: calc(100vh - 56px);
+    }
 }
 
 /* 聊天头部样式 */
@@ -515,7 +531,7 @@ textarea {
         width: 94%; /* 略微增加宽度让输入框更容易看到 */
         max-width: 94%;
         z-index: 1050; /* 确保输入框在看板娘之上 */
-        margin-bottom: 20px; /* 增加底部外边距 */
+        margin-bottom: 0px; /* 增加底部外边距 */
     }
     
     #messages {

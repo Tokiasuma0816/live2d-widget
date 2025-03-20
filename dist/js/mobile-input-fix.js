@@ -23,40 +23,11 @@
         
         if (!inputElement || !inputContainer || !messagesContainer) return;
         
-        // 设备检测
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        const isIPhoneX = isIOS && (window.innerWidth >= 375 && window.innerHeight >= 812 || window.innerWidth >= 812 && window.innerHeight >= 375);
-        
-        // 获取浏览器可视区域被底部工具栏占用的高度
-        function getDynamicBottom() {
-            let bottomDiff = 0;
-            if (window.visualViewport) {
-                bottomDiff = window.innerHeight - window.visualViewport.height;
-            }
-            return Math.max(bottomDiff, 0);
-        }
-        
         // 根据设备设置初始位置
         function setInitialPosition() {
-            const dynamicBottom = getDynamicBottom();
-            if (isIPhoneX) {
-                // iPhone X 或更新机型
-                inputContainer.style.bottom = (85 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (240 + dynamicBottom) + 'px';
-            } else if (isIOS) {
-                // 其他iOS设备
-                inputContainer.style.bottom = (75 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (230 + dynamicBottom) + 'px';
-            } else if (isAndroid) {
-                // Android设备
-                inputContainer.style.bottom = (65 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (220 + dynamicBottom) + 'px';
-            } else {
-                // 其他移动设备
-                inputContainer.style.bottom = (60 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (220 + dynamicBottom) + 'px';
-            }
+            // 统一贴底，消息容器预留固定空间
+            inputContainer.style.bottom = '0';
+            messagesContainer.style.paddingBottom = '80px';
         }
         
         // 设置初始位置
@@ -83,19 +54,9 @@
         function applyFocusedStyle() {
             // 滚动到底部
             window.scrollTo(0, document.body.scrollHeight);
-            
-            const dynamicBottom = getDynamicBottom();
-            // 根据设备类型设置不同的间距
-            if (isIPhoneX) {
-                inputContainer.style.bottom = (120 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (280 + dynamicBottom) + 'px';
-            } else if (isIOS) {
-                inputContainer.style.bottom = (110 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (270 + dynamicBottom) + 'px';
-            } else {
-                inputContainer.style.bottom = (100 + dynamicBottom) + 'px';
-                messagesContainer.style.paddingBottom = (260 + dynamicBottom) + 'px';
-            }
+            // 仍统一使用贴底
+            inputContainer.style.bottom = '0';
+            messagesContainer.style.paddingBottom = '80px';
             
             // 确保内容区域可见
             if (chatContainer && chatContainer.style.display !== 'none') {

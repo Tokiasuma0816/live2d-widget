@@ -276,16 +276,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 临时增加输入框的底部间距，防止被虚拟键盘遮挡
                     if (inputContainer) {
                         inputContainer.style.bottom = '80px'; // 进一步增加底部间距
-                        
-                        // iOS特定处理
-                        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                            inputContainer.style.bottom = '100px'; // iOS需要更多空间
-                        }
                     }
                     
                     // 确保消息列表底部有足够空间
                     if (messagesContainer) {
-                        messagesContainer.style.paddingBottom = '250px';
+                        messagesContainer.style.paddingBottom = '220px';
                     }
                 }, 300);
             });
@@ -295,20 +290,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 恢复原来的样式
                 setTimeout(() => {
                     if (inputContainer) {
-                        if (window.innerWidth <= 576) {
-                            inputContainer.style.bottom = '60px'; // 恢复小屏幕设置
-                        } else {
-                            inputContainer.style.bottom = '10px'; // 恢复中等屏幕设置
-                        }
+                        inputContainer.style.bottom = '80px'; // 恢复小屏幕设置
                     }
                     
                     // 恢复消息列表的底部间距
                     if (messagesContainer) {
-                        if (window.innerWidth <= 576) {
-                            messagesContainer.style.paddingBottom = '220px';
-                        } else {
-                            messagesContainer.style.paddingBottom = '100px';
-                        }
+                        messagesContainer.style.paddingBottom = '220px';
                     }
                 }, 100);
             });
@@ -323,3 +310,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+window.addEventListener('resize', function() {
+    const chatContainer = document.getElementById('chat-container');
+    if (!chatContainer) return;
+
+    // 如果不支持 100dvh，可用 JS 动态设置高度
+    if (!CSS.supports('height', '100dvh')) {
+        const offset = 56; // 等同导航栏高度
+        chatContainer.style.height = (window.innerHeight - offset) + 'px';
+    }
+});
+
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function() {
+        // 重新应用与窗口大小相关的布局修正
+        const chatContainer = document.getElementById('chat-container');
+        if (!chatContainer) return;
+        if (!CSS.supports('height', '100dvh')) {
+            const offset = 56; // 与导航栏高度相同
+            chatContainer.style.height = (window.innerHeight - offset) + 'px';
+        }
+        // 如果还有其他需要实时更新的元素，可在此一起处理
+    });
+}
