@@ -223,6 +223,13 @@ function initConfigUI() {
 }
 
 /**
+ * 初始化折叠面板
+ */
+function initCollapsiblePanels() {
+    // 目前为空，实现逻辑可根据实际需求添加
+}
+
+/**
  * 添加按钮波纹效果
  */
 function initButtonRippleEffects() {
@@ -271,3 +278,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 });
+
+function fixWeirdMathMarkup(text) {
+    return text
+        // 替换行内公式占位符
+        .replace(/%%MATHINLINE%%/g, '$')
+        .replace(/%%\/MATHINLINE%%/g, '$')
+        .replace(/%%MATH_INLINE%%/g, '$')
+        .replace(/%%\/MATH_INLINE%%/g, '$')
+        // 替换块公式占位符
+        .replace(/%%MATHBLOCK%%/g, '$$')
+        .replace(/%%\/MATHBLOCK%%/g, '$$')
+        .replace(/%%MATH_BLOCK%%/g, '$$')
+        .replace(/%%\/MATH_BLOCK%%/g, '$$');
+}

@@ -17,22 +17,42 @@
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.7/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.8/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
       tex: {
-        inlineMath: [['\\(', '\\)']],
-        displayMath: [['$$', '$$']], 
+        inlineMath: [
+          ['$', '$'],
+          ['\\(', '\\)']
+        ],
+        displayMath: [
+          ['$$', '$$'],
+          ['\\[', '\\]']
+        ],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        packages: ['base', 'ams', 'noerrors', 'noundefined'],
+        macros: {
+          bmatrix: "\\begin{bmatrix}#1\\end{bmatrix}",
+          pmatrix: "\\begin{pmatrix}#1\\end{pmatrix}",
+          vmatrix: "\\begin{vmatrix}#1\\end{vmatrix}"
+        }
       },
       options: {
         skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      startup: {
+        typeset: true
       }
     };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- 添加 MathLive 支持 - 更好地处理复杂 LaTeX 公式 -->
+    <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
+    <script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+    
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
     <script src="js/models.js"></script>
@@ -41,7 +61,6 @@
     <script src="js/notion-debug.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/browser-fixes.js"></script> <!-- 基本修复脚本 -->
-    <script src="js/mobile-input-fix.js"></script> <!-- 新增移动端输入框专用修复 -->
     <script src="js/model-cards.js"></script>
     
     <!-- KaTeX - 数学公式支持 -->
@@ -244,7 +263,7 @@
                 </div>
             </div>
 
-            <div class="settings-footer">
+            <div class="settings-footer"></div>
                 <button class="cancel-btn" onclick="toggleConfig()">
                     <span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -312,6 +331,83 @@
             await checkServerStatus();
         }
     });
+</script>
+
+<!-- 修复加载额外的 KaTeX 自动渲染脚本 -->
+<script>
+// 全局定义数学公式分隔符供所有渲染引擎使用
+window.MATH_DELIMITERS = [
+  {left: '$$', right: '$$', display: true},
+  {left: '$', right: '$', display: false},
+  {left: '\\[', right: '\\]', display: true},
+  {left: '\\(', right: '\\)', display: false},
+  {left: '\[', right: '\]', display: true},
+  {left: '\(', right: '\)', display: false}
+];
+
+document.addEventListener("DOMContentLoaded", function() {
+  // 初始化配置时加载MathJax配置
+  if (window.MathJax) {
+    window.MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]'], ['\[', '\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      TeX: {
+        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
+      }
+    });
+  }
+  
+  // 初始化 KaTeX 自动渲染，使用全局定义的分隔符
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: window.MATH_DELIMITERS,
+      throwOnError: false,
+      trust: true
+    });
+  }
+  
+  // 设置一个MutationObserver来监视DOM变化，异步渲染新添加的消息
+  setupMathObserver();
+});
+
+// 设置用于监视新添加消息的MutationObserver
+function setupMathObserver() {
+  if (!window.MutationObserver) return;
+  
+  const messagesContainer = document.getElementById('messages');
+  if (!messagesContainer) return;
+  
+  const observer = new MutationObserver(function(mutations) {
+    let needsRender = false;
+    
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+        // 新消息添加了，需要渲染
+        needsRender = true;
+      }
+    });
+    
+    if (needsRender) {
+      // 将渲染操作放入事件队列，确保DOM完全更新后渲染
+      setTimeout(function() {
+        if (window.renderMathInNewMessage) {
+          window.renderMathInNewMessage();
+        }
+      }, 100);
+    }
+  });
+  
+  // 开始观察消息容器的变化
+  observer.observe(messagesContainer, { 
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
 </script>
 
     <!-- 在底部添加JavaScript库 -->
