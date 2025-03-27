@@ -20,6 +20,29 @@ const GeminiAPI = {
         try {
             console.log(`使用Gemini模型: ${model}`);
             
+            // 获取消息历史记录
+            const messageHistory = config.enableMemory ? 
+                window.MessageHistory.getMessages(config.maxMemoryMessages) : [];
+            
+            // 构建消息数组，首先是系统消息
+            let messages = [
+                { 
+                    role: "system", 
+                    content: customPrompt || config.customPrompt || "You are a helpful assistant."
+                }
+            ];
+            
+            // 添加历史消息，如果启用了记忆功能
+            if (config.enableMemory && messageHistory.length > 0) {
+                messages = messages.concat(messageHistory);
+            }
+            
+            // 添加当前用户消息
+            messages.push({
+                role: "user",
+                content: message
+            });
+
             const response = await fetch(`${proxyUrl}/v1/chat/completions`, {
                 method: "POST",
                 headers: {
@@ -28,16 +51,7 @@ const GeminiAPI = {
                 },
                 body: JSON.stringify({
                     model: model || "gemini-1.5-flash", // 使用选择的模型
-                    messages: [
-                        { 
-                            role: "system", 
-                            content: customPrompt || config.customPrompt || "You are a helpful assistant."
-                        },
-                        { 
-                            role: "user", 
-                            content: message
-                        }
-                    ]
+                    messages: messages
                 })
             });
             
@@ -72,6 +86,29 @@ const GeminiAPI = {
         try {
             console.log(`使用Gemini模型 (流式): ${model}`);
             
+            // 获取消息历史记录
+            const messageHistory = config.enableMemory ? 
+                window.MessageHistory.getMessages(config.maxMemoryMessages) : [];
+            
+            // 构建消息数组，首先是系统消息
+            let messages = [
+                { 
+                    role: "system", 
+                    content: customPrompt || config.customPrompt || "You are a helpful assistant."
+                }
+            ];
+            
+            // 添加历史消息，如果启用了记忆功能
+            if (config.enableMemory && messageHistory.length > 0) {
+                messages = messages.concat(messageHistory);
+            }
+            
+            // 添加当前用户消息
+            messages.push({
+                role: "user",
+                content: message
+            });
+
             const response = await fetch(`${proxyUrl}/v1/chat/completions`, {
                 method: "POST",
                 headers: {
@@ -81,16 +118,7 @@ const GeminiAPI = {
                 },
                 body: JSON.stringify({
                     model: model || "gemini-1.5-flash",
-                    messages: [
-                        { 
-                            role: "system", 
-                            content: customPrompt || config.customPrompt || "You are a helpful assistant."
-                        },
-                        { 
-                            role: "user", 
-                            content: message
-                        }
-                    ],
+                    messages: messages,
                     stream: true
                 })
             });
@@ -167,19 +195,33 @@ const GrokAPI = {
                 chatEndpoint = "https://api.xai.com/v1/chat/completions";
             }
             
+            // 获取消息历史记录
+            const messageHistory = config.enableMemory ? 
+                window.MessageHistory.getMessages(config.maxMemoryMessages) : [];
+            
+            // 构建消息数组，首先是系统消息
+            let messages = [
+                { 
+                    role: "system", 
+                    content: customPrompt || config.customPrompt || "You are a helpful assistant."
+                }
+            ];
+            
+            // 添加历史消息，如果启用了记忆功能
+            if (config.enableMemory && messageHistory.length > 0) {
+                messages = messages.concat(messageHistory);
+            }
+            
+            // 添加当前用户消息
+            messages.push({
+                role: "user",
+                content: message
+            });
+            
             // 实际API请求
             const payload = {
                 model: model || "grok-2", // 使用选择的模型 
-                messages: [
-                    { 
-                        role: "system", 
-                        content: customPrompt || config.customPrompt || "You are a helpful assistant."
-                    },
-                    { 
-                        role: "user", 
-                        content: message
-                    }
-                ],
+                messages: messages,
                 temperature: 0.7
             };
             
@@ -263,19 +305,33 @@ const GrokAPI = {
                 chatEndpoint = "https://api.xai.com/v1/chat/completions";
             }
             
+            // 获取消息历史记录
+            const messageHistory = config.enableMemory ? 
+                window.MessageHistory.getMessages(config.maxMemoryMessages) : [];
+            
+            // 构建消息数组，首先是系统消息
+            let messages = [
+                { 
+                    role: "system", 
+                    content: customPrompt || config.customPrompt || "You are a helpful assistant."
+                }
+            ];
+            
+            // 添加历史消息，如果启用了记忆功能
+            if (config.enableMemory && messageHistory.length > 0) {
+                messages = messages.concat(messageHistory);
+            }
+            
+            // 添加当前用户消息
+            messages.push({
+                role: "user",
+                content: message
+            });
+            
             // 实际API请求
             const payload = {
                 model: model || "grok-2", // 使用选择的模型
-                messages: [
-                    { 
-                        role: "system", 
-                        content: customPrompt || config.customPrompt || "You are a helpful assistant."
-                    },
-                    { 
-                        role: "user", 
-                        content: message
-                    }
-                ],
+                messages: messages,
                 temperature: 0.7,
                 stream: true // 开启流式处理
             };

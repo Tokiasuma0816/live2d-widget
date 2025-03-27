@@ -20,10 +20,13 @@ const currentConfig = {
         token: '',
         pageId: ''
     },
-    waifuPosition: 'right'
+    waifuPosition: 'right',
+    // 添加记忆功能的配置
+    enableMemory: true,     // 默认开启记忆功能
+    maxMemoryMessages: 64   // 默认记忆64条消息
 };
 
-// 加载配置
+// 加载配置 - 修复记忆功能状态读取
 function loadConfig() {
     try {
         // 加载激活的模型
@@ -46,6 +49,11 @@ function loadConfig() {
         currentConfig.notion.token = localStorage.getItem("notion_token") || '';
         currentConfig.notion.pageId = localStorage.getItem("notion_page_id") || '';
         currentConfig.waifuPosition = localStorage.getItem("waifu-position") || 'right';
+        
+        // 加载记忆功能设置 - 修复状态读取逻辑
+        const memoryEnabled = localStorage.getItem("enable_memory");
+        currentConfig.enableMemory = memoryEnabled === null ? true : memoryEnabled === "true";
+        currentConfig.maxMemoryMessages = parseInt(localStorage.getItem("max_memory_messages") || "64", 10);
         
         // 更新UI
         updateConfigUI();
@@ -80,8 +88,30 @@ function saveConfig() {
             localStorage.setItem("notion_page_id", notionPageId.value);
         }
         
+        // 保存记忆功能设置
+        const memorySwitch = document.getElementById('memory-switch');
+        const maxMemoryInput = document.getElementById('max-memory-messages');
+        
+        if (memorySwitch) {
+            currentConfig.enableMemory = memorySwitch.checked;
+            localStorage.setItem("enable_memory", memorySwitch.checked);
+        }
+        
+        if (maxMemoryInput) {
+            const maxMessages = parseInt(maxMemoryInput.value, 10);
+            if (!isNaN(maxMessages) && maxMessages > 0) {
+                currentConfig.maxMemoryMessages = maxMessages;
+                localStorage.setItem("max_memory_messages", maxMessages.toString());
+            }
+        }
+        
         // 显示保存成功消息
         showLive2DMessage("设置已成功保存!", 3000);
+        
+        // 更新记忆功能UI
+        if (window.updateMemoryUI) {
+            window.updateMemoryUI();
+        }
         
         // 关闭配置面板
         toggleConfig();
@@ -127,6 +157,28 @@ function updateConfigUI() {
     if (notionToken && notionPageId) {
         notionToken.value = currentConfig.notion.token;
         notionPageId.value = currentConfig.notion.pageId;
+    }
+    
+    // 更新记忆功能开关
+    const memorySwitch = document.getElementById('memory-switch');
+    if (memorySwitch) {
+        memorySwitch.checked = currentConfig.enableMemory;
+    }
+    
+    // 更新最大记忆消息数
+    const maxMemoryInput = document.getElementById('max-memory-messages');
+    const memoryRange = document.getElementById('memory-range');
+    if (maxMemoryInput) {
+        maxMemoryInput.value = currentConfig.maxMemoryMessages;
+    }
+    if (memoryRange) {
+        memoryRange.value = currentConfig.maxMemoryMessages;
+        document.getElementById('memory-value').innerText = currentConfig.maxMemoryMessages;
+    }
+    
+    // 更新记忆UI状态
+    if (window.updateMemoryUI) {
+        window.updateMemoryUI();
     }
 }
 

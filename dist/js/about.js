@@ -5,7 +5,7 @@
 
 // 关于页面数据（此处可以替换为API获取或其他数据源）
 const aboutData = {
-    version: "1.0.4",
+    version: "1.0.5",
     description: "OiviO AI Assistant 是一个作者用于自用写着玩的web ui。",
     
     // API代理信息
@@ -69,7 +69,7 @@ const aboutData = {
             id: 2,
             title: "Markdown渲染有问题",
             description: "有些形式的公式不能正常渲染，特别是复杂的LaTeX公式可能会出现格式错误。",
-            status: "fixed"
+            status: "in-progress"
         },
         {
             id: 3,
@@ -81,7 +81,7 @@ const aboutData = {
             id: 4,
             title: "对话无记忆",
             description: "该网站未加入对话记忆功能，无法保存历史记录。",
-            status: "open" 
+            status: "fixed" 
         },
         {
             id: 5,

@@ -6,6 +6,9 @@ async function sendMessage() {
     document.getElementById("user-input").value = "";
     addMessage("user", userInput);
     
+    // 添加到消息历史
+    window.MessageHistory.addUserMessage(userInput);
+    
     // 创建消息元素但不立即应用完整样式
     const aiMessageDiv = document.createElement("div");
     aiMessageDiv.classList.add("message", "ai-message");
@@ -28,6 +31,9 @@ async function sendMessage() {
         if (!result.success) {
             throw new Error(result.message);
         }
+        
+        // 添加AI回复到消息历史
+        window.MessageHistory.addAIMessage(result.message);
         
         // 如果 Notion 脚本已启用，调用同步功能
         if (window.notionEnabled) {
@@ -801,6 +807,9 @@ async function clearMessages() {
         });
         
         console.log(`正在清空 ${messages.length} 条消息`);
+        
+        // 同时清空消息历史记录
+        window.MessageHistory.clearHistory();
         
         // 逐个删除消息，保持视觉连贯性
         for (let i = 0; i < messages.length; i++) {

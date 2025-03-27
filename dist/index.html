@@ -17,18 +17,20 @@
     <script src="js/helpers.js"></script>
     <!-- 移除live2d-fixes.js引用 -->
     <!-- 加载Live2D -->
-    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.8.9/dist/autoload.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/oivio-up/live2d-widget@1.9.0/dist/autoload.js"></script>
     <!-- 添加MathJax支持 -->
     <script>
     MathJax = {
       tex: {
         inlineMath: [
           ['$', '$'],
-          ['\\(', '\\)']
+          ['\\(', '\\)'],
+          ['\(', '\)']
         ],
         displayMath: [
           ['$$', '$$'],
-          ['\\[', '\\]']
+          ['\\[', '\\]'],
+          ['\[', '\]']
         ],
         processEscapes: true,
         processEnvironments: true,
@@ -55,6 +57,7 @@
     
     <!-- 加载JS模块 -->
     <script src="js/config.js"></script>
+    <script src="js/message-history.js"></script> <!-- 添加消息历史记录管理模块 -->
     <script src="js/models.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/notion.js"></script>
@@ -259,7 +262,71 @@
                     </svg>
                 </div>
                 <div class="settings-content" id="other-section">
-                    <p style="color: #64748b; font-style: italic;">更多设置选项即将推出...</p>
+                    <!-- 记忆功能设置区域 - 修复开关点击问题 -->
+                    <div class="memory-settings-container">
+                        <div class="memory-header">
+                            <h5>
+                                <svg class="memory-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                </svg>
+                                AI记忆功能
+                            </h5>
+                            <div class="memory-status">
+                                <span class="memory-status-indicator" id="memory-indicator"></span>
+                                <label class="toggle">
+                                    <!-- 修复开关: 添加onclick事件并设置正确的默认状态 -->
+                                    <input type="checkbox" id="memory-switch" onclick="toggleMemory()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="memory-stats" id="memory-stats">
+                            <div class="memory-stats-header">
+                                <span>记忆容量使用情况</span>
+                                <span id="memory-count">0/64 条</span>
+                            </div>
+                            <div class="memory-meter">
+                                <div class="memory-meter-fill" id="memory-meter-fill"></div>
+                            </div>
+                            <div class="memory-stats-info">
+                                <span>可用容量</span>
+                                <span id="memory-remaining">64 条</span>
+                            </div>
+                            <div class="memory-full-indicator" id="memory-full">记忆已满</div>
+                        </div>
+
+                        <div class="memory-controls">
+                            <div class="memory-slider">
+                                <label for="max-memory-messages">最大记忆消息数</label>
+                                <div class="memory-slider-container">
+                                    <span class="memory-value" id="memory-value">64</span>
+                                    <input type="range" id="memory-range" min="8" max="128" step="8" value="64" oninput="updateMemoryValue()">
+                                    <div class="memory-capacity-labels">
+                                        <span>较少</span>
+                                        <span></span>
+                                        <span>适中</span>
+                                        <span></span>
+                                        <span>较多</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="memory-input">
+                                <input type="number" id="max-memory-messages" min="8" max="128" step="8" value="64" oninput="updateMemoryRange()">
+                            </div>
+                        </div>
+
+                        <div class="memory-note">
+                            <h6>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                记忆功能说明
+                            </h6>
+                            <p>记忆功能可以让AI记住之前的对话，提供更连贯的回复体验。数字越大记忆越长，但会消耗更多Token。</p>
+                        </div>
+                    </div>
+                    <!-- End of memory settings -->
                 </div>
             </div>
 
@@ -341,6 +408,7 @@ window.MATH_DELIMITERS = [
   {left: '$', right: '$', display: false},
   {left: '\\[', right: '\\]', display: true},
   {left: '\\(', right: '\\)', display: false},
+  // 修复错误的引号匹配
   {left: '\[', right: '\]', display: true},
   {left: '\(', right: '\)', display: false}
 ];

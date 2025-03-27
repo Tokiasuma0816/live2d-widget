@@ -11,6 +11,21 @@
     margin-bottom: 15px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: opacity, transform; /* 提示浏览器优化这些属性的变化 */
+    transition-property: opacity, transform, border-color, box-shadow;
+}
+
+/* 添加扩展模式样式 */
+.settings-section.section-expanded {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(150, 131, 236, 0.5);
+    animation: section-expand 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes section-expand {
+    0% { transform: scale(0.98); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .settings-header {
@@ -21,7 +36,24 @@
     align-items: center;
     background: #f8fafc;
     border-bottom: 1px solid #e5e7eb;
-    transition: all 0.2s;
+    transition: all 0.3s;
+}
+
+/* 为标题添加特定的过渡效果 */
+.settings-header.header-fitted {
+    transition: transform 0.4s ease, background-color 0.3s ease;
+    transform-origin: top center;
+}
+
+.section-expanded .settings-header {
+    background: linear-gradient(to right, #f8fafc, #f0f4f8);
+    border-bottom: 1px solid rgba(150, 131, 236, 0.2);
+    padding-left: 20px;
+    /* 添加特殊效果当作为扩展面板标题时 */
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .settings-header:hover {
@@ -35,12 +67,32 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.3s;
+}
+
+.section-expanded .settings-header h4 {
+    font-size: 1.1em;
+    color: #1e293b;
+    font-weight: 600;
 }
 
 .settings-header h4 svg {
     width: 16px;
     height: 16px;
     color: #64748b;
+}
+
+.section-expanded .settings-header h4 svg {
+    width: 18px; 
+    height: 18px;
+    color: #9683EC;
+    animation: icon-pulse 2s infinite;
+}
+
+@keyframes icon-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .settings-header .arrow {
@@ -59,8 +111,19 @@
 }
 
 .settings-content.active {
-    max-height: 500px;
-    padding: 15px;
+    max-height: 1500px; /* 增加最大高度以支持扩展内容 */
+    padding: 20px;
+    transition-duration: 0.5s;
+}
+
+.section-expanded .settings-content.active {
+    padding: 25px;
+    animation: content-fade-in 0.4s ease-out;
+}
+
+@keyframes content-fade-in {
+    0% { opacity: 0.8; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .settings-header .arrow.active {
@@ -79,6 +142,11 @@
     font-size: 0.9em;
 }
 
+.section-expanded .settings-field label {
+    color: #334155;
+    font-weight: 500;
+}
+
 .settings-field input,
 .settings-field textarea {
     width: 100%;
@@ -95,6 +163,12 @@
     outline: none;
     border-color: #9683EC;
     box-shadow: 0 0 0 2px rgba(150, 131, 236, 0.15);
+}
+
+.section-expanded .settings-field input:focus,
+.section-expanded .settings-field textarea:focus,
+.section-expanded .settings-field select:focus {
+    box-shadow: 0 0 0 3px rgba(150, 131, 236, 0.2);
 }
 
 /* 设置底部按钮 */
@@ -543,11 +617,131 @@ button:disabled {
         0 0 0 1px rgba(255, 255, 255, 0.8) inset;
     overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.4s ease,
+                max-height 0.3s ease;
+    padding: 0; /* 移除内边距，由内部元素控制 */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 添加自动调整高度和滚动条的样式 */
+.settings-container.auto-adjusted {
+    transition: max-height 0.3s ease;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(150, 131, 236, 0.5) rgba(241, 245, 249, 0.3);
+}
+
+/* 自定义滚动条样式 */
+.settings-container.auto-adjusted::-webkit-scrollbar {
+    width: 6px;
+}
+
+.settings-container.auto-adjusted::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.3);
+    border-radius: 3px;
+}
+
+.settings-container.auto-adjusted::-webkit-scrollbar-thumb {
+    background: rgba(150, 131, 236, 0.5);
+    border-radius: 3px;
+}
+
+.settings-container.auto-adjusted::-webkit-scrollbar-thumb:hover {
+    background: rgba(150, 131, 236, 0.7);
+}
+
+/* 为内容适配添加的过渡动画 */
+.settings-content.active {
+    max-height: 1500px; /* 增加最大高度以支持扩展内容 */
+    padding: 20px;
+    transition: all 0.5s ease-out;
+}
+
+/* 为适配后的内容区域添加动画 */
+.content-fitted {
+    transition: transform 0.4s ease;
+}
+
+.section-expanded .settings-content.active {
+    padding: 25px;
+    animation: content-fade-in 0.4s ease-out;
+    will-change: max-height, transform; /* 优化性能 */
+}
+
+/* 确保展开后的内容可滚动 */
+.section-expanded .settings-content.active.content-fitted {
+    overflow-y: visible; /* 允许内容超出父容器 */
+    padding-bottom: 30px; /* 增加底部填充以避免内容贴边 */
+}
+
+/* 响应式调整 - 确保移动设备上适配良好 */
+@media (max-width: 768px) {
+    .settings-container.auto-adjusted {
+        max-height: 70vh !important; /* 在移动设备上限制最大高度 */
+    }
+    
+    .settings-container.auto-adjusted::-webkit-scrollbar {
+        width: 4px; /* 移动设备上使用更窄的滚动条 */
+    }
+}
+
+/* 设置面板样式 - 全面改进 */
+.settings-container {
+    max-width: 600px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.4s ease;
     padding: 0; /* 移除内边距，由内部元素控制 */
     position: relative;
     display: flex;
     flex-direction: column;
+    transition: padding 0.3s ease;
+}
+
+/* 特殊调整：更好的面板展示与过渡 */
+.section-expanded {
+    transition: all 0.3s ease;
+    z-index: 2; /* 确保展开的区块在最上层 */
+    position: relative; /* 创建新的层叠上下文 */
+}
+
+/* 确保一个部分收起时，其余部分能正确显示 */
+.settings-section:not(.section-expanded) {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s; /* 添加微小的延迟以确保平滑过渡 */
+}
+
+/* 提高显示/隐藏的过渡效果 */
+.settings-section {
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+}
+
+.settings-section[style*="display: none"] {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    position: absolute; /* 防止占用空间但仍保留在DOM中 */
+    max-height: 0;
+    overflow: hidden;
+}
+
+.settings-section[style*="display: block"] {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+    max-height: 2000px; /* 足够大以容纳内容 */
+    overflow: visible;
+    pointer-events: auto;
 }
 
 /* 新增: 内容包装器 */
@@ -556,4 +750,422 @@ button:disabled {
     overflow-y: auto;
     max-height: 60vh;
     flex: 1; /* 确保内容区域占据所有可用空间 */
+}
+
+/* Modern Toggle Switch - 完全重新设计的记忆功能开关 */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e2e8f0;
+    transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 34px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 2px;
+    bottom: 2px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 50%;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+}
+
+input:checked + .slider {
+    background: linear-gradient(135deg, #9683EC, #8A75E3);
+}
+
+input:focus + .slider {
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(150, 131, 236, 0.15);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* 添加ON/OFF文本 */
+.slider:after {
+    content: "OFF";
+    color: #64748b;
+    display: block;
+    position: absolute;
+    transform: translateX(0px);
+    right: 7px;
+    top: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    transition: 0.4s;
+}
+
+input:checked + .slider:after {
+    content: "ON";
+    transform: translateX(-26px);
+    color: white;
+    left: 7px;
+    right: auto;
+}
+
+/* 记忆功能设置区域样式 */
+.memory-settings-container {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 10px;
+    border: 1px solid #e5e7eb;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-expanded .memory-settings-container {
+    margin: 20px 0;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 1px solid rgba(150, 131, 236, 0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+}
+
+.memory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.memory-header h5 {
+    font-size: 16px;
+    margin: 0;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.memory-icon {
+    color: #9683EC;
+    width: 20px;
+    height: 20px;
+}
+
+.memory-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.memory-status-indicator {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    transition: background 0.3s ease;
+}
+
+.memory-status-indicator.active {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.memory-stats {
+    background: white;
+    border: 1px dashed #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.memory-stats.disabled {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+    pointer-events: none;
+}
+
+.memory-stats-header {
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.memory-meter {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+    position: relative;
+}
+
+.memory-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #9683EC, #64B5F6);
+    border-radius: 4px;
+    width: 0%; /* 将由JS动态设置 */
+    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.memory-stats-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+/* 记忆功能控制区域 */
+.memory-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.memory-slider {
+    flex: 1;
+}
+
+.memory-slider label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 0.9em;
+}
+
+.memory-slider-container {
+    position: relative;
+    height: 40px;
+    padding-top: 15px;
+}
+
+.memory-slider input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    border-radius: 5px;
+    background: #e2e8f0;
+    outline: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.memory-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9683EC, #8A75E3);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.memory-slider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9683EC, #8A75E3);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+    border: none;
+}
+
+.memory-slider input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(150, 131, 236, 0.4);
+}
+
+.memory-slider input[type="range"]:disabled {
+    opacity: 0.5;
+}
+
+.memory-slider input[type="range"]:disabled::-webkit-slider-thumb {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: scale(1);
+    box-shadow: none;
+}
+
+.memory-value {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.memory-input {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.memory-input input {
+    text-align: center;
+    font-weight: 500;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* 记忆容量标签 */
+.memory-capacity-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.memory-capacity-labels span {
+    position: relative;
+}
+
+.memory-capacity-labels span:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 5px;
+    width: 1px;
+    background-color: #cbd5e1;
+}
+
+/* 记忆满状态样式 */
+.memory-full-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #f87171;
+    color: white;
+    border-radius: 12px;
+    font-size: 10px;
+    padding: 2px 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.memory-full-indicator.visible {
+    opacity: 1;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* 重新设计记忆功能说明卡片 */
+.memory-note {
+    margin-top: 15px;
+    padding: 12px 15px;
+    background-color: #fef9c3;
+    border-radius: 8px;
+    border-left: 3px solid #facc15;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.memory-note::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(254, 249, 195, 0.4), transparent);
+    pointer-events: none;
+    border-radius: 0 8px 8px 0;
+}
+
+.memory-note h6 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #854d0e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.memory-note h6 svg {
+    width: 16px;
+    height: 16px;
+}
+
+.memory-note p {
+    margin: 0;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.5;
+}
+
+/* 添加返回按钮样式 */
+#settings-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: transparent;
+    color: #64748b;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 0 15px -5px;
+    border-radius: 8px;
+}
+
+#settings-back-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+    transform: translateX(-3px);
+}
+
+#settings-back-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s;
+}
+
+#settings-back-btn:hover svg {
+    transform: translateX(-2px);
+}
+
+/* 为标题添加特殊悬浮效果 */
+.section-expanded .settings-header:hover {
+    background: linear-gradient(to right, #f3f6fb, #eef3fa);
 }
