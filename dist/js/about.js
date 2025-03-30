@@ -5,20 +5,20 @@
 
 // 关于页面数据（此处可以替换为API获取或其他数据源）
 const aboutData = {
-    version: "1.0.5",
-    description: "OiviO AI Assistant 是一个作者用于自用写着玩的web ui。",
+    version: "1.0.6",
+    description: "OiviO AI Assistant 是一个作者用于自用写着玩的web ui，有些功能可能不完善，欢迎反馈bug和建议。",
     
     // API代理信息
     apiProxies: [
         {
             name: "Gemini API",
-            url: "https://geminiapi.85555555.xyz/v1/chat/completions",
+            url: "如有需要请联系作者",
             description: "Gemini可以国内直接使用无需代理"
         },
         {
             name: "Grok API",
-            url: "https://grokapi.85555555.xyz/v1/chat/completions",
-            description: "暂未实现国内直接使用"
+            url: "如有需要请联系作者",
+            description: "Grok已实现国内直接使用"
         }
     ],
     
@@ -75,7 +75,7 @@ const aboutData = {
             id: 3,
             title: "grok api需要代理",
             description: "在国内环境下，Grok API不能访问。",
-            status: "open" 
+            status: "fixed" 
         },
         {
             id: 4,
@@ -447,7 +447,7 @@ function createProxiesList(proxies) {
                 <div class="proxy-name">${proxy.name}</div>
                 <div class="proxy-badge">${proxy.name.includes('Gemini') ? 
                     '<span class="status-fixed">可直接访问</span>' : 
-                    '<span class="status-open">需代理访问</span>'}</div>
+                    '<span class="status-fixed">可直接访问</span>'}</div>
             </div>
             <div class="proxy-url">
                 <code>${proxy.url}</code>
