@@ -315,6 +315,34 @@ function createModelSpecificCards(modelType) {
                 icon: '🚀'
             },
             {
+                id: 'grok-3-beta',
+                name: 'Grok 3 Beta',
+                description: '最新全尺寸模型，最强大能力',
+                tag: '新版',
+                icon: '⚡'
+            },
+            {
+                id: 'grok-3-fast-beta',
+                name: 'Grok 3 Fast',
+                description: '全尺寸快速模型，更高响应速度',
+                tag: '快速',
+                icon: '🔥'
+            },
+            {
+                id: 'grok-3-mini-beta',
+                name: 'Grok 3 Mini',
+                description: '小型版模型，减少资源消耗',
+                tag: '轻量',
+                icon: '✨'
+            },
+            {
+                id: 'grok-3-mini-fast-beta',
+                name: 'Grok 3 Mini Fast',
+                description: '小型快速版，最高性价比选择',
+                tag: '高效',
+                icon: '💨'
+            },
+            {
                 id: 'grok-2-vision',
                 name: 'Grok Vision',
                 description: '支持图像理解分析',

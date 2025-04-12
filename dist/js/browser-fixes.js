@@ -135,6 +135,19 @@
                     }
                 }
                 
+                // 更新模型下拉框选中的模型
+                // 使用最新的Grok 3 Beta作为默认选择
+                const grokModelSelect = document.getElementById('grok-model');
+                if (grokModelSelect) {
+                    // 检查是否有grok-3-beta选项，如果有则默认选中它
+                    const grok3Option = Array.from(grokModelSelect.options).find(option => 
+                        option.value === 'grok-3-beta');
+                    
+                    if (grok3Option) {
+                        grokModelSelect.value = 'grok-3-beta';
+                    }
+                }
+                
                 // 直接调用弹出设置函数
                 showModelPopup('grok', newGrokCard);
             });

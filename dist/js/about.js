@@ -12,12 +12,12 @@ const aboutData = {
     apiProxies: [
         {
             name: "Gemini API",
-            url: "如有需要请联系作者",
+            url: "https://geminiapi.85555555.xyz/v1/chat/completions",
             description: "Gemini可以国内直接使用无需代理"
         },
         {
             name: "Grok API",
-            url: "如有需要请联系作者",
+            url: "https://xaiapi.85555555.xyz",
             description: "Grok已实现国内直接使用"
         }
     ],
